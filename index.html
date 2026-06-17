@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bierport — Etiquetas & Carteles</title>
+<style>
+  :root {
+    --bg:       #F5F4F0;
+    --surface:  #FFFFFF;
+    --border:   #E2E0D8;
+    --text:     #1A1A18;
+    --muted:    #7A7870;
+    --accent:   #1A1A18;
+    --danger:   #CC2200;
+    --success:  #1A6B3C;
+    --font:     'Inter', system-ui, sans-serif;
+    --mono:     'JetBrains Mono', 'Fira Mono', monospace;
+    --radius:   8px;
+    --radius-lg:12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; height: 100vh; display: flex; overflow: hidden; }
+
+  /* ── Sidebar ─────────────────────────────── */
+  .sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .logo { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); }
+  .logo-name { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .nav-group { padding: 10px 8px 2px; }
+  .nav-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 8px 4px; }
+  .nav-item  { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--muted); transition: background 0.1s; user-select: none; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--text); color: white; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-bottom { margin-top: auto; padding: 8px; border-top: 1px solid var(--border); }
+  .sync-info { padding: 8px 10px; font-size: 11px; color: var(--muted); }
+  .sync-date { font-weight: 600; color: var(--text); }
+
+  /* ── Main ────────────────────────────────── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+  .topbar { padding: 0 20px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .topbar-title { font-size: 14px; font-weight: 600; }
+  .topbar-sub   { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+  /* ── Tabs ────────────────────────────────── */
+  .tabs { display: flex; gap: 2px; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tab { font-size: 12px; padding: 10px 14px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.1s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--text); }
+
+  /* ── Módulos ─────────────────────────────── */
+  .modulo { display: none; flex: 1; overflow: hidden; }
+  .modulo.active { display: flex; }
+
+  /* ── Módulo Góndola ──────────────────────── */
+  .gondola-layout { display: flex; flex: 1; overflow: hidden; gap: 0; }
+  .col-busqueda { width: 300px; flex-shrink: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .col-lista { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+  .col-acciones { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; }
+
+  .col-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .col-header .badge { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 20px; text-transform: none; letter-spacing: 0; }
+
+  /* Búsqueda */
+  .busqueda-area { padding: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .input-wrap { position: relative; margin-bottom: 8px; }
+  .input-wrap input { width: 100%; padding: 8px 10px 8px 32px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--bg); color: var(--text); outline: none; }
+  .input-wrap input:focus { border-color: var(--text); background: white; }
+  .input-ico { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 15px; height: 15px; }
+  .btn-scan { width: 100%; padding: 7px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 12px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.1s; }
+  .btn-scan:hover { background: var(--border); }
+  .scan-active { background: #e8f5e8 !important; border-color: var(--success) !important; color: var(--success) !important; }
+  select.filtro { width: 100%; padding: 7px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 12px; color: var(--text); outline: none; margin-top: 6px; }
+
+  /* Resultados */
+  .resultados-scroll { flex: 1; overflow-y: auto; }
+  .res-empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 12px; }
+  .res-item { display: flex; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--border); cursor: pointer; gap: 10px; transition: background 0.1s; }
+  .res-item:hover { background: var(--bg); }
+  .res-info { flex: 1; min-width: 0; }
+  .res-nombre { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .res-seccion { font-size: 11px; color: var(--muted); }
+  .res-precio { font-size: 13px; font-weight: 700; font-family: var(--mono); white-space: nowrap; }
+  .res-add { color: var(--muted); font-size: 20px; line-height: 1; flex-shrink: 0; transition: color 0.1s; }
+  .res-item:hover .res-add { color: var(--text); }
+
+  /* Lista */
+  .lista-scroll { flex: 1; overflow-y: auto; }
+  .lista-empty { padding: 32px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+  .lista-empty p { margin-top: 8px; font-size: 12px; }
+  .lista-item { display: flex; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--border); gap: 10px; }
+  .li-info { flex: 1; min-width: 0; }
+  .li-nombre  { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .li-seccion { font-size: 11px; color: var(--muted); }
+  .li-precio  { font-size: 13px; font-weight: 700; font-family: var(--mono); white-space: nowrap; }
+  .copias     { display: flex; align-items: center; gap: 4px; }
+  .copias button { width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; color: var(--text); }
+  .copias button:hover { background: var(--border); }
+  .copias span { font-size: 12px; min-width: 18px; text-align: center; font-weight: 600; }
+  .li-del { color: var(--muted); cursor: pointer; font-size: 18px; flex-shrink: 0; }
+  .li-del:hover { color: var(--danger); }
+
+  /* Acciones */
+  .accion-section { padding: 14px; border-bottom: 1px solid var(--border); }
+  .accion-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .stat-box { background: var(--bg); border-radius: var(--radius); padding: 8px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
+  .stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .info-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; }
+  .info-row span:first-child { color: var(--muted); }
+  .info-row span:last-child { font-weight: 500; }
+
+  /* Barra ocupación */
+  .ocup-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+  .ocup-label span:first-child { color: var(--muted); }
+  .ocup-label strong { font-weight: 700; }
+  .ocup-bar-bg   { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+  .ocup-bar-fill { height: 100%; background: var(--text); border-radius: 3px; transition: width 0.4s ease; }
+  .ocup-stats { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--muted); }
+  .ocup-stats strong { color: var(--text); font-weight: 600; }
+
+  /* Botones */
+  .btn-primary { width: 100%; padding: 9px; border-radius: var(--radius); border: none; background: var(--text); color: white; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity 0.1s; margin-bottom: 6px; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary { width: 100%; padding: 8px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; color: var(--text); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.1s; }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-danger { color: var(--danger); border-color: #ffc8c0; }
+  .btn-danger:hover { background: #fff0ee; }
+
+  /* ── Módulo Oferta ───────────────────────── */
+  .oferta-layout { flex: 1; overflow-y: auto; padding: 20px; display: flex; gap: 20px; }
+  .oferta-form { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+  .oferta-preview-col { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+  .form-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .form-group { margin-bottom: 10px; }
+  .form-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; display: block; }
+  .form-input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--bg); color: var(--text); outline: none; }
+  .form-input:focus { border-color: var(--text); background: white; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .seg-ctrl { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 2px; }
+  .seg-opt { flex: 1; padding: 5px; text-align: center; font-size: 12px; border-radius: 6px; cursor: pointer; color: var(--muted); transition: all 0.1s; }
+  .seg-opt.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  .color-opts { display: flex; gap: 8px; }
+  .color-opt { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: border-color 0.1s; }
+  .color-opt.selected { border-color: var(--text); }
+
+  /* Vista previa oferta — mini */
+  .preview-mini { border-radius: var(--radius-lg); overflow: hidden; font-family: Arial, sans-serif; }
+  .pm-header { text-align: center; padding: 8px; }
+  .pm-header span { color: #FFE000; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
+  .pm-nombre { color: white; font-weight: 700; text-align: center; padding: 6px 10px 3px; line-height: 1.2; }
+  .pm-ant { text-align: center; padding: 2px 0; }
+  .pm-ant span { color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; font-weight: 700; }
+  .pm-ant s { color: rgba(255,255,255,0.4); font-weight: 700; }
+  .pm-precio { display: flex; align-items: baseline; justify-content: center; gap: 3px; flex: 1; padding: 4px 8px; }
+  .pm-signo  { color: #FFE000; font-weight: 900; }
+  .pm-num    { color: #FFE000; font-weight: 900; line-height: 1; white-space: nowrap; }
+  .pm-ahorro { text-align: center; font-weight: 900; text-transform: uppercase; background: #FFE000; }
+  .pm-vigencia { text-align: center; color: rgba(255,255,255,0.7); }
+
+  /* ── Módulo Combo ────────────────────────── */
+  .combo-layout { flex: 1; overflow-y: auto; padding: 20px; display: flex; gap: 20px; }
+  .combo-form { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+  .combo-preview-col { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+  .prod-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .prod-row input { flex: 1; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; background: var(--bg); color: var(--text); outline: none; }
+  .prod-row input:focus { border-color: var(--text); background: white; }
+  .prod-row input.precio-input { width: 90px; flex: none; font-family: var(--mono); }
+  .prod-num { font-size: 11px; color: var(--muted); min-width: 14px; }
+
+  /* ── Modal Vista Previa ──────────────────── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; width: 680px; }
+  .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .modal-title { font-size: 14px; font-weight: 600; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); line-height: 1; padding: 2px 6px; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; background: #666; }
+  .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; }
+
+  /* Hoja A4 en modal */
+  .hoja-a4 { background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.3); display: grid; position: relative; }
+  .hoja-a4.gondola { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(8, 1fr); width: 420px; height: 594px; }
+  .etiq-slot { border: 0.5px solid #eee; display: flex; flex-direction: column; justify-content: space-between; padding: 4px 5px 3px; overflow: hidden; }
+  .etiq-slot.vacia { background: #fafafa; }
+  .etiq-slot.ocupada { background: white; }
+  .es-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .es-sec  { font-size: 5.5px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; }
+  .es-fecha { font-size: 5px; color: #bbb; }
+  .es-nom  { font-size: 7px; font-weight: 700; color: #111; line-height: 1.1; margin: 2px 0; }
+  .es-precio { font-size: 14px; font-weight: 900; color: #111; text-align: right; line-height: 1; }
+  .es-precio small { font-size: 7px; font-weight: 500; vertical-align: top; margin-top: 1px; display: inline-block; }
+  .paginador { display: flex; align-items: center; gap: 10px; color: white; font-size: 13px; }
+  .paginador button { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 13px; }
+  .paginador button:hover { background: rgba(255,255,255,0.3); }
+  .paginador button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .ocup-modal { background: white; padding: 12px 18px; border-radius: var(--radius); width: 420px; }
+
+  /* ── Importar ─────────────────────────────── */
+  .import-layout { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .import-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; width: 460px; text-align: center; }
+  .import-icon { font-size: 40px; margin-bottom: 12px; }
+  .import-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .import-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .import-steps { text-align: left; font-size: 12px; color: var(--muted); margin-bottom: 20px; line-height: 1.8; }
+  .import-steps code { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-family: var(--mono); font-size: 11px; color: var(--text); }
+
+  /* ── Toast ───────────────────────────────── */
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; padding: 10px 16px; border-radius: var(--radius); font-size: 13px; z-index: 9999; opacity: 0; transform: translateY(8px); transition: all 0.2s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error { background: var(--danger); }
+
+  /* ── Spinner ─────────────────────────────── */
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Scrollbar ───────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-name">Bierport</div>
+    <div class="logo-sub">Etiquetas & carteles</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Módulos</div>
+    <div class="nav-item active" onclick="setModulo('gondola')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+      Góndola
+    </div>
+    <div class="nav-item" onclick="setModulo('oferta')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Ofertas
+    </div>
+    <div class="nav-item" onclick="setModulo('combo')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      Combos
+    </div>
+  </div>
+  <div class="nav-bottom">
+    <div class="nav-item" onclick="setModulo('importar')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Importar lista
+    </div>
+    <div class="sync-info" id="sync-info">
+      <div style="color:var(--muted)">Lista de precios</div>
+      <div class="sync-date" id="sync-date">Cargando...</div>
+      <div id="sync-total" style="font-size:11px;color:var(--muted)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Etiquetas de góndola</div>
+      <div class="topbar-sub" id="topbar-sub">Escaneá o buscá productos · precios con IVA incluido</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-secondary" style="width:auto;padding:6px 12px;font-size:12px;" onclick="abrirModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Vista previa
+      </button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" id="tabs-gondola">
+    <div class="tab active" onclick="setTabGondola(this,'gondola')">Etiqueta góndola · 70×34 mm</div>
+  </div>
+  <div class="tabs" id="tabs-oferta" style="display:none">
+    <div class="tab active" onclick="setTabOferta('medio')">½ A4 apaisado · 210×148 mm</div>
+    <div class="tab" onclick="setTabOferta('completo')">A4 completo · 210×297 mm</div>
+  </div>
+  <div class="tabs" id="tabs-combo" style="display:none">
+    <div class="tab active">Combo A6 · 4 por hoja A4 apaisada</div>
+  </div>
+
+  <!-- MÓDULO GÓNDOLA -->
+  <div class="modulo active" id="mod-gondola">
+    <div class="gondola-layout">
+
+      <!-- Búsqueda -->
+      <div class="col-busqueda">
+        <div class="col-header">Buscar producto</div>
+        <div class="busqueda-area">
+          <div class="input-wrap">
+            <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="input-busqueda" placeholder="Nombre del producto..." oninput="onBuscar(this.value)" />
+          </div>
+          <button class="btn-scan" id="btn-scan" onclick="toggleScan()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg>
+            Modo escaneo
+          </button>
+          <select class="filtro" id="filtro-seccion" onchange="onBuscar(document.getElementById('input-busqueda').value)">
+            <option value="">Todas las secciones</option>
+          </select>
+        </div>
+        <div class="resultados-scroll" id="resultados">
+          <div class="res-empty">Escribí para buscar o escaneá un producto</div>
+        </div>
+      </div>
+
+      <!-- Lista -->
+      <div class="col-lista">
+        <div class="col-header">
+          Lista de impresión
+          <span class="badge" id="badge-lista">0 etiquetas</span>
+        </div>
+        <div class="lista-scroll" id="lista-items">
+          <div class="lista-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 8px;display:block"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            La lista está vacía
+            <p>Buscá productos y hacé clic en + para agregarlos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="col-acciones">
+        <div class="accion-section">
+          <div class="accion-title">Resumen</div>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-num" id="stat-etiq">0</div>
+              <div class="stat-lbl">etiquetas</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-num" id="stat-hojas">0</div>
+              <div class="stat-lbl">hojas A4</div>
+            </div>
+          </div>
+          <div class="info-row"><span>Formato</span><span>70 × 34 mm</span></div>
+          <div class="info-row"><span>Por hoja</span><span>24 etiq.</span></div>
+        </div>
+        <div class="accion-section">
+          <div class="accion-title">Ocupación</div>
+          <div class="ocup-label">
+            <span>Hoja actual</span>
+            <strong id="ocup-pct">0%</strong>
+          </div>
+          <div class="ocup-bar-bg"><div class="ocup-bar-fill" id="ocup-bar" style="width:0%"></div></div>
+          <div class="ocup-stats">
+            <span><strong id="ocup-libres">24</strong> libres</span>
+            <span><strong id="ocup-usados">0</strong> usados</span>
+          </div>
+        </div>
+        <div class="accion-section">
+          <div class="accion-title">Imprimir</div>
+          <button class="btn-primary" id="btn-preview" onclick="abrirModal()" disabled>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Ver e imprimir
+          </button>
+          <button class="btn-secondary btn-danger" onclick="vaciarLista()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Vaciar lista
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO OFERTA -->
+  <div class="modulo" id="mod-oferta">
+    <div class="oferta-layout">
+      <div class="oferta-form">
+
+        <div class="form-card">
+          <div class="form-title">Producto</div>
+          <div class="input-wrap" style="margin-bottom:8px">
+            <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="of-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto..." oninput="buscarOferta(this.value)">
+          </div>
+          <div id="of-resultados" style="display:none; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:8px;"></div>
+          <div class="form-group">
+            <label class="form-label">Nombre en el cartel</label>
+            <input type="text" class="form-input" id="of-nombre" placeholder="Ej: Pepsi Cola 2,25 L">
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-title">Precios</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Precio normal ($)</label>
+              <input type="number" class="form-input" id="of-precio-normal" placeholder="2200" oninput="actualizarOferta()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Precio oferta ($)</label>
+              <input type="number" class="form-input" id="of-precio-oferta" placeholder="1900" oninput="actualizarOferta()">
+            </div>
+          </div>
+          <div class="info-row" style="padding:6px 0 0">
+            <span>Ahorrás</span>
+            <span id="of-ahorro" style="font-weight:700;color:var(--success)">—</span>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-title">Diseño</div>
+          <div class="form-group">
+            <label class="form-label">Cabecera</label>
+            <select class="form-input" id="of-cabecera" onchange="actualizarOferta()">
+              <option>OFERTA</option>
+              <option>PRECIO ESPECIAL</option>
+              <option>¡APROVECHÁ!</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Color</label>
+            <div class="color-opts">
+              <div class="color-opt selected" style="background:#CC0000" onclick="setColorOferta('rojo',this)" title="Rojo"></div>
+              <div class="color-opt" style="background:#1a56a0" onclick="setColorOferta('azul',this)" title="Azul"></div>
+              <div class="color-opt" style="background:#1a7a3c" onclick="setColorOferta('verde',this)" title="Verde"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Válido hasta</label>
+            <input type="date" class="form-input" id="of-vigencia" onchange="actualizarOferta()">
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="imprimirOferta()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Generar PDF de oferta
+        </button>
+      </div>
+
+      <div class="oferta-preview-col">
+        <div class="form-card" style="flex:1;display:flex;flex-direction:column;">
+          <div class="form-title">Vista previa</div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);border-radius:var(--radius);">
+            <div id="oferta-preview-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO COMBO -->
+  <div class="modulo" id="mod-combo">
+    <div class="combo-layout">
+      <div class="combo-form">
+
+        <div class="form-card">
+          <div class="form-title">Datos del combo</div>
+          <div class="form-group">
+            <label class="form-label">Nombre del combo</label>
+            <input type="text" class="form-input" id="co-nombre" placeholder="Ej: Combo Picada" oninput="actualizarCombo()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cabecera</label>
+            <select class="form-input" id="co-cabecera" onchange="actualizarCombo()">
+              <option>COMBO</option>
+              <option>LLEVÁ LOS DOS</option>
+              <option>PACK AHORRO</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Color</label>
+            <div class="color-opts">
+              <div class="color-opt selected" style="background:#1a56a0" onclick="setColorCombo('azul',this)" title="Azul"></div>
+              <div class="color-opt" style="background:#CC0000" onclick="setColorCombo('rojo',this)" title="Rojo"></div>
+              <div class="color-opt" style="background:#1a7a3c" onclick="setColorCombo('verde',this)" title="Verde"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-title">Productos incluidos</div>
+          <div id="combo-prods">
+            <div class="prod-row"><span class="prod-num">1</span><input type="text" placeholder="Nombre del producto" oninput="actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="actualizarCombo()"></div>
+            <div class="prod-row"><span class="prod-num">2</span><input type="text" placeholder="Nombre del producto" oninput="actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="actualizarCombo()"></div>
+            <div class="prod-row"><span class="prod-num">3</span><input type="text" placeholder="Nombre del producto" oninput="actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="actualizarCombo()"></div>
+            <div class="prod-row"><span class="prod-num">4</span><input type="text" placeholder="Nombre del producto" oninput="actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="actualizarCombo()"></div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-title">Precio</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Precio combo ($)</label>
+              <input type="number" class="form-input" id="co-precio" placeholder="5500" oninput="actualizarCombo()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Válido hasta</label>
+              <input type="date" class="form-input" id="co-vigencia" onchange="actualizarCombo()">
+            </div>
+          </div>
+          <div class="info-row" style="padding:4px 0 0">
+            <span>Precio por separado</span>
+            <span id="co-sep">—</span>
+          </div>
+          <div class="info-row">
+            <span>Ahorrás</span>
+            <span id="co-ahorro" style="font-weight:700;color:var(--success)">—</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="imprimirCombo()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Generar PDF de combo
+        </button>
+      </div>
+
+      <div class="combo-preview-col">
+        <div class="form-card" style="flex:1;display:flex;flex-direction:column;">
+          <div class="form-title">Vista previa</div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);border-radius:var(--radius);">
+            <div id="combo-preview-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO IMPORTAR -->
+  <div class="modulo" id="mod-importar">
+    <div class="import-layout">
+      <div class="import-card">
+        <div class="import-icon">📥</div>
+        <div class="import-title">Importar lista de productos</div>
+        <div class="import-sub">Para actualizar los precios, ejecutá el script Python con el nuevo Excel de Odoo</div>
+        <div class="import-steps">
+          <div>1. Exportá el listado de productos desde Odoo incluyendo <strong>Categoría del producto</strong> y <strong>Código de barras</strong></div>
+          <div>2. Colocá el Excel en la misma carpeta que <code>importar_productos_v2.py</code></div>
+          <div>3. Ejecutá en la Terminal: <code>python3 importar_productos_v2.py</code></div>
+          <div>4. Confirmá con <code>s</code> y esperá que termine</div>
+        </div>
+        <button class="btn-primary" style="width:auto;margin:0 auto;" onclick="cargarInfo()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          Actualizar estado
+        </button>
+        <div id="import-status" style="margin-top:16px;font-size:12px;color:var(--muted);"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL VISTA PREVIA -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Vista previa — Etiquetas de góndola</div>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" style="width:auto;padding:7px 14px;" onclick="cerrarModal()">Cerrar</button>
+      <button class="btn-primary" style="width:auto;padding:7px 16px;" onclick="generarPDF()" id="btn-generar-pdf">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqgEYZo3h7D0pl2fj7oHNt7OTfh6brK2Mb8jG57NJlJUQoHy-TkklJhUGGQPzYQvFj/exec';
+const POR_HOJA   = 24;
+const HOY        = new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+// ── Estado ────────────────────────────────────────────────────
+let lista         = [];       // [{nombre, seccion, precio, copias}]
+let moduloActual  = 'gondola';
+let scanActivo    = false;
+let scanBuffer    = '';
+let scanTimer     = null;
+let colorOferta   = 'rojo';
+let colorCombo    = 'azul';
+let tamañoOferta  = 'medio';
+let busquedaTimer = null;
+let paginaModal   = 1;
+
+const COLORES = {
+  rojo:  { fondo:'#CC0000', header:'#AA0000' },
+  azul:  { fondo:'#1a56a0', header:'#0f3d7a' },
+  verde: { fondo:'#1a7a3c', header:'#125a2c' },
+};
+
+// ── Módulos ───────────────────────────────────────────────────
+function setModulo(mod) {
+  moduloActual = mod;
+  document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+  document.getElementById('mod-' + mod).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('tabs-gondola').style.display = mod === 'gondola' ? 'flex' : 'none';
+  document.getElementById('tabs-oferta').style.display  = mod === 'oferta'  ? 'flex' : 'none';
+  document.getElementById('tabs-combo').style.display   = mod === 'combo'   ? 'flex' : 'none';
+  const titles = {
+    gondola:  ['Etiquetas de góndola', 'Escaneá o buscá productos · precios con IVA incluido'],
+    oferta:   ['Cartel de oferta', 'Creá carteles de oferta en ½ A4 o A4 completo'],
+    combo:    ['Cartel de combo', 'Armá combos con hasta 4 productos · tamaño A6'],
+    importar: ['Importar productos', 'Actualizá la lista de precios desde Odoo'],
+  };
+  document.getElementById('topbar-title').textContent = titles[mod][0];
+  document.getElementById('topbar-sub').textContent   = titles[mod][1];
+  document.querySelector('.topbar-right').style.display = mod === 'gondola' ? 'flex' : 'none';
+}
+
+function setTabOferta(tam) {
+  tamañoOferta = tam;
+  document.querySelectorAll('#tabs-oferta .tab').forEach((t,i) => {
+    t.classList.toggle('active', (tam==='medio' && i===0)||(tam==='completo' && i===1));
+  });
+  actualizarOferta();
+}
+
+// ── Búsqueda ──────────────────────────────────────────────────
+function onBuscar(valor) {
+  clearTimeout(busquedaTimer);
+  if (!valor || valor.length < 2) {
+    document.getElementById('resultados').innerHTML = '<div class="res-empty">Escribí para buscar o escaneá un producto</div>';
+    return;
+  }
+  document.getElementById('resultados').innerHTML = '<div class="res-empty"><div class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--text);margin:0 auto"></div></div>';
+  busquedaTimer = setTimeout(() => ejecutarBusqueda(valor), 350);
+}
+
+function ejecutarBusqueda(valor) {
+  const sec = document.getElementById('filtro-seccion').value;
+  const url = `${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(valor)}&seccion=${encodeURIComponent(sec)}`;
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      const cont = document.getElementById('resultados');
+      if (!data.resultados || data.resultados.length === 0) {
+        cont.innerHTML = '<div class="res-empty">Sin resultados para "' + valor + '"</div>';
+        return;
+      }
+      cont.innerHTML = data.resultados.map(p => `
+        <div class="res-item" onclick='agregarProducto(${JSON.stringify(p)})'>
+          <div class="ri-info">
+            <div class="res-nombre">${p.nombre}</div>
+            <div class="res-seccion">${p.seccion}</div>
+          </div>
+          <div class="res-precio">$\u00a0${p.precioConIVA.toLocaleString('es-AR')}</div>
+          <div class="res-add">+</div>
+        </div>`).join('');
+    })
+    .catch(() => {
+      document.getElementById('resultados').innerHTML = '<div class="res-empty">Error de conexión</div>';
+    });
+}
+
+// ── Escaneo ───────────────────────────────────────────────────
+function toggleScan() {
+  scanActivo = !scanActivo;
+  const btn = document.getElementById('btn-scan');
+  if (scanActivo) {
+    btn.classList.add('scan-active');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg> Escaneando...`;
+    toast('Modo escaneo activo — apuntá la pistola al producto');
+  } else {
+    btn.classList.remove('scan-active');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg> Modo escaneo`;
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (!scanActivo) return;
+  if (e.key === 'Enter') {
+    if (scanBuffer.length >= 8) buscarPorCodigo(scanBuffer);
+    scanBuffer = '';
+    return;
+  }
+  if (e.key.length === 1 && /\d/.test(e.key)) {
+    scanBuffer += e.key;
+    clearTimeout(scanTimer);
+    scanTimer = setTimeout(() => {
+      if (scanBuffer.length >= 8) buscarPorCodigo(scanBuffer);
+      scanBuffer = '';
+    }, 200);
+  }
+});
+
+function buscarPorCodigo(codigo) {
+  fetch(`${SCRIPT_URL}?accion=buscarPorCodigo&codigo=${encodeURIComponent(codigo)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.encontrado) {
+        agregarProducto(data);
+        toast('✓ ' + data.nombre);
+      } else {
+        toast('Producto no encontrado: ' + codigo, true);
+      }
+    })
+    .catch(() => toast('Error de conexión', true));
+}
+
+// ── Lista ─────────────────────────────────────────────────────
+function agregarProducto(p) {
+  const idx = lista.findIndex(x => x.barcode === p.barcode && x.nombre === p.nombre);
+  if (idx >= 0) {
+    lista[idx].copias++;
+  } else {
+    lista.push({ barcode: p.barcode || '', nombre: p.nombre, seccion: p.seccion, precio: p.precioConIVA, copias: 1 });
+  }
+  renderLista();
+  toast('Agregado: ' + p.nombre);
+}
+
+function renderLista() {
+  const cont = document.getElementById('lista-items');
+  if (lista.length === 0) {
+    cont.innerHTML = `<div class="lista-empty">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 8px;display:block"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      La lista está vacía
+      <p>Buscá productos y hacé clic en + para agregarlos</p>
+    </div>`;
+  } else {
+    cont.innerHTML = lista.map((p, i) => `
+      <div class="lista-item">
+        <div class="li-info">
+          <div class="li-nombre">${p.nombre}</div>
+          <div class="li-seccion">${p.seccion}</div>
+        </div>
+        <div class="li-precio">$\u00a0${p.precio.toLocaleString('es-AR')}</div>
+        <div class="copias">
+          <button onclick="cambiarCopias(${i},-1)">−</button>
+          <span>${p.copias}</span>
+          <button onclick="cambiarCopias(${i},1)">+</button>
+        </div>
+        <div class="li-del" onclick="quitarProducto(${i})">✕</div>
+      </div>`).join('');
+  }
+  actualizarStats();
+}
+
+function cambiarCopias(idx, delta) {
+  lista[idx].copias = Math.max(1, lista[idx].copias + delta);
+  renderLista();
+}
+
+function quitarProducto(idx) {
+  lista.splice(idx, 1);
+  renderLista();
+}
+
+function vaciarLista() {
+  if (lista.length === 0) return;
+  if (!confirm('¿Vaciar la lista de impresión?')) return;
+  lista = [];
+  renderLista();
+}
+
+function actualizarStats() {
+  const total    = lista.reduce((s, p) => s + p.copias, 0);
+  const hojas    = Math.ceil(total / POR_HOJA) || 0;
+  const enHoja   = total % POR_HOJA || (total > 0 ? POR_HOJA : 0);
+  const libres   = total === 0 ? POR_HOJA : POR_HOJA - enHoja;
+  const pct      = total === 0 ? 0 : Math.round(enHoja / POR_HOJA * 100);
+
+  document.getElementById('stat-etiq').textContent  = total;
+  document.getElementById('stat-hojas').textContent = hojas;
+  document.getElementById('badge-lista').textContent = total + ' etiquetas';
+  document.getElementById('ocup-pct').textContent   = pct + '%';
+  document.getElementById('ocup-bar').style.width   = pct + '%';
+  document.getElementById('ocup-libres').textContent = libres;
+  document.getElementById('ocup-usados').textContent = enHoja;
+  document.getElementById('btn-preview').disabled   = total === 0;
+}
+
+// ── Modal vista previa ────────────────────────────────────────
+function abrirModal() {
+  if (lista.length === 0) return;
+  paginaModal = 1;
+  renderModal();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function renderModal() {
+  const total  = lista.reduce((s, p) => s + p.copias, 0);
+  const hojas  = Math.ceil(total / POR_HOJA);
+
+  // Expandir etiquetas
+  const slots = [];
+  lista.forEach(p => { for (let i = 0; i < p.copias; i++) slots.push(p); });
+
+  // Generar hoja A4
+  const inicio = (paginaModal - 1) * POR_HOJA;
+  let hojaHTML = '<div class="hoja-a4 gondola">';
+  for (let i = 0; i < POR_HOJA; i++) {
+    const p = slots[inicio + i];
+    if (p) {
+      hojaHTML += `<div class="etiq-slot ocupada">
+        <div class="es-top">
+          <div class="es-sec">${p.seccion}</div>
+          <div class="es-fecha">${HOY}</div>
+        </div>
+        <div class="es-nom">${p.nombre}</div>
+        <div class="es-precio"><small>$</small> ${p.precio.toLocaleString('es-AR')}</div>
+      </div>`;
+    } else {
+      hojaHTML += '<div class="etiq-slot vacia"></div>';
+    }
+  }
+  hojaHTML += '</div>';
+
+  const enHoja = Math.min(total - (paginaModal - 1) * POR_HOJA, POR_HOJA);
+  const pct    = Math.round(enHoja / POR_HOJA * 100);
+  const libres = POR_HOJA - enHoja;
+
+  document.getElementById('modal-title').textContent = `Vista previa — ${total} etiquetas en ${hojas} hoja${hojas>1?'s':''}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="paginador">
+      <button onclick="cambiarPagina(-1)" ${paginaModal===1?'disabled':''}>← Anterior</button>
+      <span>Hoja ${paginaModal} de ${hojas}</span>
+      <button onclick="cambiarPagina(1)" ${paginaModal===hojas?'disabled':''}>Siguiente →</button>
+    </div>
+    ${hojaHTML}
+    <div class="ocup-modal">
+      <div class="ocup-label">
+        <span>Ocupación hoja ${paginaModal}</span>
+        <strong>${pct}%</strong>
+      </div>
+      <div class="ocup-bar-bg"><div class="ocup-bar-fill" style="width:${pct}%"></div></div>
+      <div class="ocup-stats">
+        <span><strong>${enHoja}</strong> usados</span>
+        <span><strong>${libres}</strong> espacios libres</span>
+        <span><strong>${hojas}</strong> hoja${hojas>1?'s':''} total</span>
+      </div>
+    </div>`;
+}
+
+function cambiarPagina(delta) {
+  const total = lista.reduce((s, p) => s + p.copias, 0);
+  const hojas = Math.ceil(total / POR_HOJA);
+  paginaModal = Math.max(1, Math.min(hojas, paginaModal + delta));
+  renderModal();
+}
+
+// ── Generar PDF (usando jsPDF via CDN) ────────────────────────
+function generarPDF() {
+  const btn = document.getElementById('btn-generar-pdf');
+  btn.innerHTML = '<div class="spinner"></div> Generando...';
+  btn.disabled = true;
+
+  // Cargar jsPDF si no está cargado
+  if (typeof window.jspdf === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => { generarPDFGondola(); btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar PDF'; btn.disabled = false; };
+    document.head.appendChild(script);
+  } else {
+    generarPDFGondola();
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar PDF';
+    btn.disabled = false;
+  }
+}
+
+function generarPDFGondola() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const ET_W = 70, ET_H = 34, COLS = 3, ROWS = 8;
+  const slots = [];
+  lista.forEach(p => { for (let i = 0; i < p.copias; i++) slots.push(p); });
+
+  const hojas = Math.ceil(slots.length / (COLS * ROWS));
+
+  for (let pg = 0; pg < hojas; pg++) {
+    if (pg > 0) doc.addPage();
+    for (let fila = 0; fila < ROWS; fila++) {
+      for (let col = 0; col < COLS; col++) {
+        const idx = pg * COLS * ROWS + fila * COLS + col;
+        const p   = slots[idx];
+        const x   = col * ET_W;
+        const y   = fila * ET_H;
+
+        // Borde
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        doc.rect(x, y, ET_W, ET_H);
+
+        if (!p) continue;
+
+        const pad = 2;
+        // Sección
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(5.5);
+        doc.setTextColor(120, 120, 120);
+        doc.text(p.seccion.toUpperCase(), x + pad, y + 4.5);
+
+        // Fecha
+        doc.setFontSize(5);
+        doc.setTextColor(170, 170, 170);
+        doc.text(HOY, x + ET_W - pad, y + 4.5, { align: 'right' });
+
+        // Nombre (truncar si es largo)
+        doc.setFontSize(7);
+        doc.setTextColor(17, 17, 17);
+        doc.setFont('helvetica', 'bold');
+        let nombre = p.nombre;
+        while (doc.getTextWidth(nombre) > ET_W - pad * 2 - 2 && nombre.length > 3)
+          nombre = nombre.slice(0, -2) + '…';
+        doc.text(nombre, x + pad, y + 9.5);
+
+        // Precio
+        const precioStr = p.precio.toLocaleString('es-AR');
+        const fsNum = precioStr.length >= 6 ? 22 : precioStr.length >= 5 ? 26 : 30;
+        const fsSig = fsNum * 0.48;
+
+        doc.setFontSize(fsSig);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(17, 17, 17);
+        const wSig = doc.getTextWidth('$ ');
+        const wNum = doc.getTextWidth(precioStr);
+        const startX = x + (ET_W - wSig - wNum) / 2;
+        const baseY  = y + ET_H - 3;
+
+        doc.text('$ ', startX, baseY - (fsNum - fsSig) * 0.12);
+        doc.setFontSize(fsNum);
+        doc.text(precioStr, startX + wSig, baseY);
+
+        // Fecha abajo
+        doc.setFontSize(5.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(80, 80, 80);
+        doc.text('Act. ' + HOY, x + pad, y + ET_H - 2);
+      }
+    }
+  }
+
+  doc.save('etiquetas_gondola_' + new Date().toISOString().slice(0,10) + '.pdf');
+  toast('PDF descargado');
+}
+
+// ── Oferta ────────────────────────────────────────────────────
+function buscarOferta(valor) {
+  clearTimeout(busquedaTimer);
+  const cont = document.getElementById('of-resultados');
+  if (!valor || valor.length < 2) { cont.style.display = 'none'; return; }
+  busquedaTimer = setTimeout(() => {
+    fetch(`${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(valor)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.resultados?.length) { cont.style.display = 'none'; return; }
+        cont.style.display = 'block';
+        cont.innerHTML = data.resultados.slice(0,5).map(p => `
+          <div class="res-item" onclick="seleccionarOferta(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+            <div class="ri-info"><div class="res-nombre">${p.nombre}</div></div>
+            <div class="res-precio">$\u00a0${p.precioConIVA.toLocaleString('es-AR')}</div>
+          </div>`).join('');
+      });
+  }, 300);
+}
+
+function seleccionarOferta(p) {
+  document.getElementById('of-nombre').value = p.nombre;
+  document.getElementById('of-precio-normal').value = p.precioConIVA;
+  document.getElementById('of-busqueda').value = p.nombre;
+  document.getElementById('of-resultados').style.display = 'none';
+  actualizarOferta();
+}
+
+function setColorOferta(color, el) {
+  colorOferta = color;
+  document.querySelectorAll('#mod-oferta .color-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  actualizarOferta();
+}
+
+function actualizarOferta() {
+  const normal  = parseFloat(document.getElementById('of-precio-normal').value) || 0;
+  const oferta  = parseFloat(document.getElementById('of-precio-oferta').value) || 0;
+  const ahorro  = normal - oferta;
+  const nombre  = document.getElementById('of-nombre').value || 'Nombre del producto';
+  const cabecera = document.getElementById('of-cabecera').value;
+  const vigEl   = document.getElementById('of-vigencia').value;
+  const vigencia = vigEl ? new Date(vigEl + 'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+
+  document.getElementById('of-ahorro').textContent = ahorro > 0 ? '$ ' + ahorro.toLocaleString('es-AR') : '—';
+
+  const c = COLORES[colorOferta];
+  const isMedio = tamañoOferta === 'medio';
+  const w = isMedio ? 280 : 220;
+  const h = isMedio ? 148 : 320;
+
+  const fsHeader  = isMedio ? 18 : 22;
+  const fsNombre  = isMedio ? 13 : 16;
+  const fsAntes   = isMedio ? 9  : 11;
+  const fsPrecioAnt = isMedio ? 13 : 16;
+  const fsSig     = isMedio ? 22 : 26;
+  const fsNum     = oferta >= 10000 ? (isMedio ? 38 : 54) : (isMedio ? 48 : 70);
+  const fsAhorro  = isMedio ? 11 : 14;
+  const fsVig     = isMedio ? 9  : 11;
+
+  document.getElementById('oferta-preview-wrap').innerHTML = `
+    <div style="width:${w}px;height:${h}px;background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;border-radius:4px;">
+      <div style="background:${c.header};text-align:center;padding:${isMedio?'7px':'10px'};">
+        <span style="color:#FFE000;font-weight:900;font-size:${fsHeader}px;text-transform:uppercase;letter-spacing:0.1em;">${cabecera}</span>
+      </div>
+      <div style="color:white;font-weight:700;text-align:center;padding:${isMedio?'6px 10px 2px':'10px 14px 4px'};font-size:${fsNombre}px;line-height:1.15;">${nombre}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:2px 0;">
+        <span style="color:rgba(255,255,255,0.55);font-weight:700;font-size:${fsAntes}px;text-transform:uppercase;">Antes</span>
+        <span style="color:rgba(255,255,255,0.45);font-weight:700;font-size:${fsPrecioAnt}px;text-decoration:line-through;">$ ${normal>0?normal.toLocaleString('es-AR'):'—'}</span>
+      </div>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:3px;flex:1;padding:0 8px;">
+        <span style="color:#FFE000;font-weight:900;font-size:${fsSig}px;">$</span>
+        <span style="color:#FFE000;font-weight:900;font-size:${fsNum}px;line-height:1;white-space:nowrap;">${oferta>0?oferta.toLocaleString('es-AR'):'—'}</span>
+      </div>
+      <div style="background:#FFE000;text-align:center;font-weight:900;font-size:${fsAhorro}px;padding:${isMedio?'5px':'8px'} 0;text-transform:uppercase;color:${c.header};">
+        Ahorrás $ ${ahorro>0?ahorro.toLocaleString('es-AR'):'—'}
+      </div>
+      <div style="text-align:center;color:rgba(255,255,255,0.7);font-size:${fsVig}px;padding:${isMedio?'4px':'7px'} 0 ${isMedio?'5px':'8px'};">
+        Válido hasta el ${vigencia}
+      </div>
+    </div>`;
+}
+
+function imprimirOferta() {
+  const nombre  = document.getElementById('of-nombre').value;
+  const normal  = parseFloat(document.getElementById('of-precio-normal').value) || 0;
+  const oferta  = parseFloat(document.getElementById('of-precio-oferta').value) || 0;
+  if (!nombre || !oferta) { toast('Completá nombre y precio de oferta', true); return; }
+
+  toast('Generando PDF de oferta...');
+  if (typeof window.jspdf === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => generarPDFOferta(nombre, normal, oferta);
+    document.head.appendChild(script);
+  } else {
+    generarPDFOferta(nombre, normal, oferta);
+  }
+}
+
+function generarPDFOferta(nombre, normal, oferta) {
+  const { jsPDF } = window.jspdf;
+  const isMedio = tamañoOferta === 'medio';
+  const W = 210, H = isMedio ? 148 : 297;
+  const doc = new jsPDF({ orientation: isMedio ? 'landscape' : 'portrait', unit: 'mm', format: isMedio ? [148, 210] : 'a4' });
+
+  const c = COLORES[colorOferta];
+  const cabecera = document.getElementById('of-cabecera').value;
+  const vigEl = document.getElementById('of-vigencia').value;
+  const vigencia = vigEl ? new Date(vigEl + 'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  const ahorro = normal - oferta;
+
+  const hexToRgb = hex => { const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); return [r,g,b]; };
+
+  // Fondo
+  doc.setFillColor(...hexToRgb(c.fondo));
+  doc.rect(0, 0, W, H, 'F');
+
+  // Header
+  const hH = isMedio ? 22 : 28;
+  doc.setFillColor(...hexToRgb(c.header));
+  doc.rect(0, 0, W, hH, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(isMedio ? 20 : 28);
+  doc.setTextColor(255, 224, 0);
+  doc.text(cabecera, W/2, hH - 5, { align: 'center' });
+
+  // Nombre
+  doc.setFontSize(isMedio ? 14 : 18);
+  doc.setTextColor(255,255,255);
+  doc.text(nombre, W/2, hH + (isMedio ? 10 : 13), { align: 'center' });
+
+  // Antes
+  doc.setFontSize(isMedio ? 10 : 13);
+  doc.setTextColor(255,170,170);
+  const antY = hH + (isMedio ? 20 : 27);
+  doc.text('ANTES  $ ' + normal.toLocaleString('es-AR'), W/2, antY, { align: 'center' });
+
+  // Precio nuevo
+  const precioStr = oferta.toLocaleString('es-AR');
+  const fsN = precioStr.length >= 6 ? (isMedio ? 38 : 56) : (isMedio ? 50 : 72);
+  const fsS = fsN * 0.45;
+  doc.setFontSize(fsS);
+  doc.setTextColor(255, 224, 0);
+  const wS = doc.getTextWidth('$ ');
+  doc.setFontSize(fsN);
+  const wN = doc.getTextWidth(precioStr);
+  const px = (W - wS - wN) / 2;
+  const py = isMedio ? 95 : 168;
+  doc.setFontSize(fsS);
+  doc.text('$ ', px, py - (fsN - fsS) * 0.18);
+  doc.setFontSize(fsN);
+  doc.text(precioStr, px + wS, py);
+
+  // Ahorro
+  const ahH = isMedio ? 14 : 18;
+  const ahY = isMedio ? H - 28 : H - 36;
+  doc.setFillColor(255, 224, 0);
+  doc.rect(0, ahY, W, ahH, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(isMedio ? 13 : 17);
+  doc.setTextColor(...hexToRgb(c.header));
+  doc.text('AHORRÁS $ ' + ahorro.toLocaleString('es-AR'), W/2, ahY + ahH - 4, { align: 'center' });
+
+  // Vigencia
+  doc.setFontSize(isMedio ? 10 : 12);
+  doc.setTextColor(255,255,255);
+  doc.text('Válido hasta el ' + vigencia, W/2, H - (isMedio ? 6 : 8), { align: 'center' });
+
+  doc.save('oferta_' + new Date().toISOString().slice(0,10) + '.pdf');
+  toast('PDF de oferta descargado');
+}
+
+// ── Combo ─────────────────────────────────────────────────────
+function setColorCombo(color, el) {
+  colorCombo = color;
+  document.querySelectorAll('#mod-combo .color-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  actualizarCombo();
+}
+
+function actualizarCombo() {
+  const rows   = document.querySelectorAll('#combo-prods .prod-row');
+  const prods  = [];
+  let sepTotal = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const nom    = inputs[0].value.trim();
+    const prec   = parseFloat(inputs[1].value) || 0;
+    if (nom) { prods.push({nombre: nom, precio: prec}); sepTotal += prec; }
+  });
+
+  const precioCombo = parseFloat(document.getElementById('co-precio').value) || 0;
+  const ahorro      = sepTotal - precioCombo;
+  const vigEl       = document.getElementById('co-vigencia').value;
+  const vigencia    = vigEl ? new Date(vigEl+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  const cabecera    = document.getElementById('co-cabecera').value;
+  const nombre      = document.getElementById('co-nombre').value || 'Nombre del combo';
+
+  document.getElementById('co-sep').textContent   = sepTotal > 0 ? '$ ' + sepTotal.toLocaleString('es-AR') : '—';
+  document.getElementById('co-ahorro').textContent = ahorro > 0  ? '$ ' + ahorro.toLocaleString('es-AR')  : '—';
+
+  const c   = COLORES[colorCombo];
+  const fsP = prods.length <= 2 ? 12 : prods.length === 3 ? 11 : 10;
+  const fsCombo = precioCombo >= 10000 ? 28 : 36;
+
+  document.getElementById('combo-preview-wrap').innerHTML = `
+    <div style="width:360px;height:170px;background:${c.fondo};display:grid;grid-template-columns:auto 1fr auto;font-family:Arial,sans-serif;border-radius:4px;overflow:hidden;">
+      <div style="background:${c.header};display:flex;align-items:center;justify-content:center;padding:0 10px;writing-mode:vertical-rl;transform:rotate(180deg);">
+        <span style="color:#FFE000;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap;">${cabecera}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:10px 12px;gap:4px;">
+        ${prods.map(p => `<div style="color:white;font-size:${fsP}px;font-weight:700;display:flex;gap:6px;align-items:baseline;">
+          <span style="color:#FFE000;font-size:14px;">•</span>
+          ${p.nombre}
+          ${p.precio>0?`<span style="color:rgba(255,255,255,0.4);font-size:10px;text-decoration:line-through;">$ ${p.precio.toLocaleString('es-AR')}</span>`:''}
+        </div>`).join('')}
+        ${prods.length === 0 ? '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Agregá productos</div>' : ''}
+        <div style="margin-top:6px;display:flex;align-items:center;gap:8px;">
+          <div style="background:#FFE000;color:${c.header};font-size:9px;font-weight:900;padding:2px 8px;border-radius:3px;text-transform:uppercase;">
+            Ahorrás $ ${ahorro>0?ahorro.toLocaleString('es-AR'):'—'}
+          </div>
+          <div style="color:rgba(255,255,255,0.55);font-size:9px;">Válido hasta ${vigencia}</div>
+        </div>
+      </div>
+      <div style="background:#FFE000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 14px;min-width:100px;gap:2px;">
+        <div style="font-size:8px;font-weight:900;color:${c.header};text-transform:uppercase;letter-spacing:0.06em;">Combo</div>
+        <div style="font-size:11px;font-weight:700;color:#888;text-decoration:line-through;">$ ${sepTotal>0?sepTotal.toLocaleString('es-AR'):'—'}</div>
+        <div style="display:flex;align-items:baseline;gap:2px;">
+          <span style="font-size:15px;font-weight:900;color:${c.header};">$</span>
+          <span style="font-size:${fsCombo}px;font-weight:900;color:${c.header};line-height:0.9;letter-spacing:-1px;white-space:nowrap;">${precioCombo>0?precioCombo.toLocaleString('es-AR'):'—'}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function imprimirCombo() {
+  const nombre = document.getElementById('co-nombre').value;
+  const precio = parseFloat(document.getElementById('co-precio').value) || 0;
+  if (!nombre || !precio) { toast('Completá nombre y precio del combo', true); return; }
+  toast('Generando PDF de combo...');
+  if (typeof window.jspdf === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = generarPDFCombo;
+    document.head.appendChild(script);
+  } else {
+    generarPDFCombo();
+  }
+}
+
+function generarPDFCombo() {
+  const { jsPDF } = window.jspdf;
+  // A4 apaisada, 4 combos A6
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  // 297×210mm, cada combo 148.5×105mm
+  const CW = 148.5, CH = 105;
+  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
+
+  const rows     = document.querySelectorAll('#combo-prods .prod-row');
+  const prods    = [];
+  let sepTotal   = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const nom    = inputs[0].value.trim();
+    const prec   = parseFloat(inputs[1].value) || 0;
+    if (nom) { prods.push({nombre:nom, precio:prec}); sepTotal += prec; }
+  });
+
+  const precioCombo = parseFloat(document.getElementById('co-precio').value) || 0;
+  const ahorro      = sepTotal - precioCombo;
+  const cabecera    = document.getElementById('co-cabecera').value;
+  const vigEl       = document.getElementById('co-vigencia').value;
+  const vigencia    = vigEl ? new Date(vigEl+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  const c           = COLORES[colorCombo];
+
+  const hexToRgb = hex => [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+
+  posiciones.forEach(([ox, oy]) => {
+    // Fondo
+    doc.setFillColor(...hexToRgb(c.fondo));
+    doc.rect(ox, oy, CW, CH, 'F');
+
+    // Cabecera vertical (izquierda) — 18mm ancho
+    const cabW = 18;
+    doc.setFillColor(...hexToRgb(c.header));
+    doc.rect(ox, oy, cabW, CH, 'F');
+
+    // Header texto vertical — aproximación horizontal rotada
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(12);
+    doc.setTextColor(255,224,0);
+    doc.text(cabecera, ox + cabW/2, oy + CH/2, { align:'center', angle:90 });
+
+    // Zona productos
+    const prodX = ox + cabW + 4;
+    const prodW = CW - cabW - 4 - 42;
+    doc.setFontSize(9);
+    doc.setTextColor(255,255,255);
+    prods.forEach((p, i) => {
+      const py = oy + 14 + i * 16;
+      doc.text('• ' + p.nombre, prodX, py);
+      if (p.precio > 0) {
+        doc.setTextColor(255,255,255,100);
+        doc.setFontSize(8);
+        doc.text('$ ' + p.precio.toLocaleString('es-AR'), prodX + 2, py + 5);
+        doc.setFontSize(9);
+        doc.setTextColor(255,255,255);
+      }
+    });
+
+    // Ahorro
+    doc.setFillColor(255,224,0);
+    doc.rect(prodX, oy + CH - 18, prodW, 10, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(...hexToRgb(c.header));
+    doc.setFont('helvetica','bold');
+    doc.text('Ahorrás $ ' + (ahorro>0?ahorro.toLocaleString('es-AR'):'—'), prodX + prodW/2, oy + CH - 11, {align:'center'});
+
+    // Vigencia
+    doc.setFontSize(7);
+    doc.setTextColor(255,255,255);
+    doc.text('Válido hasta ' + vigencia, prodX + prodW/2, oy + CH - 4, {align:'center'});
+
+    // Precio combo (derecha)
+    const precX = ox + CW - 42;
+    doc.setFillColor(255,224,0);
+    doc.rect(precX, oy, 42, CH, 'F');
+
+    doc.setFontSize(8);
+    doc.setTextColor(...hexToRgb(c.header));
+    doc.text('COMBO', precX + 21, oy + 10, {align:'center'});
+
+    doc.setFontSize(9);
+    doc.setTextColor(150,150,150);
+    doc.text('$ ' + sepTotal.toLocaleString('es-AR'), precX + 21, oy + 20, {align:'center'});
+
+    const precStr = precioCombo.toLocaleString('es-AR');
+    const fsP = precStr.length >= 6 ? 18 : 24;
+    doc.setFontSize(fsP);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(...hexToRgb(c.header));
+    doc.text('$', precX + 8, oy + 42);
+    doc.text(precStr, precX + 21, oy + 62, {align:'center'});
+
+    // Línea de corte
+    doc.setDrawColor(180,180,180);
+    doc.setLineWidth(0.3);
+    doc.setLineDashPattern([2,2], 0);
+    if (ox === 0) { doc.line(0, oy + CH, 297, oy + CH); }
+    if (oy === 0) { doc.line(ox + CW, 0, ox + CW, 210); }
+    doc.setLineDashPattern([], 0);
+  });
+
+  doc.save('combo_' + new Date().toISOString().slice(0,10) + '.pdf');
+  toast('PDF de combo descargado');
+}
+
+// ── Info sistema ──────────────────────────────────────────────
+function cargarInfo() {
+  document.getElementById('sync-date').textContent = '...';
+  fetch(`${SCRIPT_URL}?accion=getInfo`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('sync-date').textContent  = data.fechaActualizacion || 'Sin datos';
+      document.getElementById('sync-total').textContent = data.totalProductos ? data.totalProductos + ' productos' : '';
+      const st = document.getElementById('import-status');
+      if (st) st.textContent = data.totalProductos + ' productos cargados · última actualización: ' + (data.fechaActualizacion || '—');
+    })
+    .catch(() => { document.getElementById('sync-date').textContent = 'Sin conexión'; });
+}
+
+function cargarSecciones() {
+  fetch(`${SCRIPT_URL}?accion=listarSecciones`)
+    .then(r => r.json())
+    .then(data => {
+      const sel = document.getElementById('filtro-seccion');
+      (data.secciones || []).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        sel.appendChild(opt);
+      });
+    });
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function toast(msg, esError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (esError ? ' error' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 2800);
+}
+
+// ── Init ──────────────────────────────────────────────────────
+cargarInfo();
+cargarSecciones();
+actualizarOferta();
+actualizarCombo();
+renderLista();
+</script>
+</body>
+</html>
