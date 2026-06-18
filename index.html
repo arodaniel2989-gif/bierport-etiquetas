@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bierport — Etiquetas & Carteles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:       #F5F4F0;
@@ -1077,317 +1079,206 @@ function actualizarOferta() {
 }
 
 function imprimirOferta() {
-  const nombre  = document.getElementById('of-nombre').value;
-  const normal  = parseFloat(document.getElementById('of-precio-normal').value) || 0;
-  const oferta  = parseFloat(document.getElementById('of-precio-oferta').value) || 0;
+  const nombre = document.getElementById('of-nombre').value;
+  const normal = parseFloat(document.getElementById('of-precio-normal').value) || 0;
+  const oferta = parseFloat(document.getElementById('of-precio-oferta').value) || 0;
   if (!nombre || !oferta) { toast('Completá nombre y precio de oferta', true); return; }
-
-  toast('Generando PDF de oferta...');
-  if (typeof window.jspdf === 'undefined') {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload = () => generarPDFOferta(nombre, normal, oferta);
-    document.head.appendChild(script);
-  } else {
-    generarPDFOferta(nombre, normal, oferta);
-  }
+  toast('Generando imagen...');
+  // Esperar que las fuentes estén listas
+  document.fonts.ready.then(() => generarPNGOferta(nombre, normal, oferta));
 }
 
-function generarPDFOferta(nombre, normal, oferta) {
-  const { jsPDF } = window.jspdf;
-  const isMedio = tamañoOferta === 'medio';
-  const c = COLORES[colorOferta];
+function generarPNGOferta(nombre, normal, oferta) {
+  const isMedio  = tamañoOferta === 'medio';
+  const c        = COLORES[colorOferta];
   const cabecera = document.getElementById('of-cabecera').value;
-  const vigEl = document.getElementById('of-vigencia').value;
-  const vigencia = vigEl ? new Date(vigEl + 'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-  const ahorro = normal - oferta;
-  const hexToRgb = hex => [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+  const vigEl    = document.getElementById('of-vigencia').value;
+  const vigencia = vigEl ? new Date(vigEl+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  const ahorro   = normal - oferta;
 
-  // ── ½ A4: hoja A4 vertical con DOS ofertas (una arriba, una abajo)
-  // Cada oferta ocupa 210mm × 148.5mm dentro de la hoja A4 portrait
-  // ── A4 completo: 210×297mm, una sola oferta
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  // Valores aprobados (en px CSS → escalar a 300dpi)
+  // A4 a 300dpi: 2480×3508px  |  ½A4 (apaisado) a 300dpi: 2480×1748px
+  // Escala: 1px CSS (en cartel de 273px ancho) → 2480/210mm*factor
+  // Usamos directamente píxeles a 300dpi
+  const DPI   = 300;
+  const MM2PX = DPI / 25.4; // 11.81 px/mm
 
-  // dibujarOferta: dibuja un cartel en la zona (ox, oy, W, H) del documento
-  function dibujarOferta(ox, oy, W, H) {
-    const pad = 4;
-    const isMedioLocal = H < 200; // medio A4 si alto < 200mm
+  // Dimensiones reales en px a 300dpi
+  const CW = Math.round(210 * MM2PX); // 2480px
+  const CH = isMedio ? Math.round(148.5 * MM2PX) : Math.round(297 * MM2PX);
+  // Para medio: hoja A4 tiene 2 carteles → canvas = 2480 × (2×1748) = 2480×3508
+  const canvasW = CW;
+  const canvasH = isMedio ? CH * 2 : CH;
 
-    // Escala relativa: A4 completo = H=297, medio = H=148.5
-    // Valores aprobados para A4 completo, escalados para medio
-    const escala  = H / 297;
+  // Factor de escala desde valores aprobados (en cartel 273px = 210mm)
+  const ESC = CW / 273;  // 2480/273 ≈ 9.08
 
-    // ── FONDO ───────────────────────────────────────
-    doc.setFillColor(...hexToRgb(c.fondo));
-    doc.rect(ox, oy, W, H, 'F');
+  // Valores aprobados multiplicados por ESC
+  const hdrH    = Math.round(46  * ESC);
+  const fsCab   = Math.round(42  * ESC);
+  const fsNom   = Math.round(24  * ESC);
+  const fsAntes = Math.round(12  * ESC);
+  const fsNum   = Math.round(115 * ESC);
+  const fsSig   = Math.round(35  * ESC);
+  const ahoH    = Math.round(44  * ESC);
+  const fsAho   = Math.round(17  * ESC);
+  const fsVig   = Math.round(10  * ESC);
+  const pad     = Math.round(16  * ESC);
 
-    // ── HEADER ──────────────────────────────────────
-    const hH    = 35.7 * escala;          // aprobado: 50px → 35.7mm en A4
-    const fsCab = Math.round(20 * escala); // aprobado: ~20pt en A4
-    doc.setFillColor(...hexToRgb(c.header));
-    doc.rect(ox, oy, W, hH, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(fsCab);
-    doc.setTextColor(255, 224, 0);
-    doc.text(cabecera, ox + W/2, oy + hH * 0.72, { align: 'center' });
+  // Escalar para ½ A4 (la mitad del alto)
+  const escMedio = isMedio ? 0.5 : 1;
 
-    // ── NOMBRE ──────────────────────────────────────
-    const fsNom = Math.round(18 * escala); // aprobado: 18pt en A4
-    doc.setFontSize(fsNom);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    let nom = nombre;
-    while (doc.getTextWidth(nom) > W - pad*2 && nom.length > 3) nom = nom.slice(0,-2) + '…';
-    const nomY = oy + hH + fsNom * 0.8;
-    doc.text(nom, ox + W/2, nomY, { align: 'center' });
+  const canvas = document.createElement('canvas');
+  canvas.width  = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext('2d');
 
-    // ── ANTES ───────────────────────────────────────
-    const fsAntes = Math.round(8 * escala); // aprobado: 8pt en A4
-    doc.setFontSize(fsAntes);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 170, 170);
-    const antY = nomY + fsAntes * 1.4;
-    doc.text('ANTES  $ ' + normal.toLocaleString('es-AR'), ox + W/2, antY, { align: 'center' });
+  function dibujarCartel(ox, oy, W, H) {
+    const esc = H / (isMedio ? CH : CH); // siempre 1 por cartel
 
-    // ── AHORRO — definir zona antes del precio ──────
-    const ahH = 31.4 * escala;            // aprobado: 44px → 31.4mm en A4
-    const fsAh = Math.round(12 * escala); // aprobado: ~12pt en A4
-    const vigH = 8 * escala;
-    const ahY  = oy + H - ahH - vigH;
+    // ── FONDO ────────────────────────────────────────
+    ctx.fillStyle = c.fondo;
+    ctx.fillRect(ox, oy, W, H);
 
-    // ── PRECIO NUEVO — protagonista ─────────────────
+    // ── CABECERA ─────────────────────────────────────
+    const hH = Math.round(hdrH * (H / (isMedio ? CH : CH)));
+    ctx.fillStyle = c.header;
+    ctx.fillRect(ox, oy, W, hH);
+    ctx.fillStyle = '#FFE000';
+    ctx.font = `${Math.round(fsCab * H/CH)}px Anton, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(cabecera, ox + W/2, oy + hH/2);
+
+    // ── NOMBRE ───────────────────────────────────────
+    ctx.fillStyle = '#FFFFFF';
+    const fsN = Math.round(fsNom * H/CH);
+    ctx.font = `700 ${fsN}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    // Partir en líneas si no entra
+    const maxW = W - pad*2;
+    const palabras = nombre.split(' ');
+    const lineas = [];
+    let lineaActual = '';
+    for (const p of palabras) {
+      const prueba = lineaActual ? lineaActual + ' ' + p : p;
+      if (ctx.measureText(prueba).width <= maxW) {
+        lineaActual = prueba;
+      } else {
+        if (lineaActual) lineas.push(lineaActual);
+        lineaActual = p;
+      }
+    }
+    if (lineaActual) lineas.push(lineaActual);
+    const nomY = oy + hH + Math.round(fsN * 0.3);
+    lineas.forEach((l, i) => ctx.fillText(l, ox + W/2, nomY + i * Math.round(fsN * 1.2)));
+    const nomBottom = nomY + lineas.length * Math.round(fsN * 1.2);
+
+    // ── ANTES ────────────────────────────────────────
+    const fsA = Math.round(fsAntes * H/CH);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = `700 ${fsA}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const antY = nomBottom + Math.round(fsA * 0.4);
+    ctx.fillText('ANTES  $ ' + normal.toLocaleString('es-AR'), ox + W/2, antY);
+    const antBottom = antY + fsA * 1.3;
+
+    // ── AHORRO — zona inferior ────────────────────────
+    const aH  = Math.round(ahoH * H/CH);
+    const vigH = Math.round(fsVig * H/CH * 2.5);
+    const aY  = oy + H - aH - vigH;
+
+    // ── PRECIO ───────────────────────────────────────
     const precioStr = oferta.toLocaleString('es-AR');
-
-    // Valores aprobados: 84pt número, 36pt signo (para A4 completo)
-    // Verificar que entren en el ancho disponible
-    let fsN = Math.round(84 * escala);
-    let fsS = Math.round(36 * escala);
+    let fsP = Math.round(fsNum * H/CH);
+    let fsS = Math.round(fsSig * H/CH);
 
     // Ajustar si no entra en el ancho
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(fsN);
-    let wN = doc.getTextWidth(precioStr);
-    doc.setFontSize(fsS);
-    let wS = doc.getTextWidth('$');
-    const wEsp = 2;
-    const maxW = W - pad * 2;
-    while ((wS + wEsp + wN) > maxW && fsN > 20) {
-      fsN -= 2; fsS = Math.round(fsN * 0.43);
-      doc.setFontSize(fsN); wN = doc.getTextWidth(precioStr);
-      doc.setFontSize(fsS); wS = doc.getTextWidth('$');
+    ctx.font = `${fsP}px 'Bebas Neue', sans-serif`;
+    let wNum = ctx.measureText(precioStr).width;
+    ctx.font = `${fsS}px 'Bebas Neue', sans-serif`;
+    let wSig = ctx.measureText('$').width;
+    const wEsp = Math.round(8 * H/CH);
+    while ((wSig + wEsp + wNum) > maxW && fsP > 40) {
+      fsP -= 4; fsS = Math.round(fsP * 0.30);
+      ctx.font = `${fsP}px 'Bebas Neue', sans-serif`;
+      wNum = ctx.measureText(precioStr).width;
+      ctx.font = `${fsS}px 'Bebas Neue', sans-serif`;
+      wSig = ctx.measureText('$').width;
     }
 
-    const totalW  = wS + wEsp + wN;
+    const totalW  = wSig + wEsp + wNum;
     const startX  = ox + (W - totalW) / 2;
 
     // Centrar verticalmente entre ANTES y AHORRO
-    const zonaTop    = antY + 4;
-    const zonaBottom = ahY - 2;
-    const altN       = fsN * 0.3528;
-    const baseY      = zonaBottom - (zonaBottom - zonaTop - altN) / 2;
+    const zonaTop = antBottom + Math.round(10 * H/CH);
+    const zonaBot = aY - Math.round(10 * H/CH);
+    const baseY   = zonaTop + (zonaBot - zonaTop) / 2 + fsP * 0.35;
 
-    doc.setTextColor(255, 224, 0);
-    doc.setFontSize(fsS);
-    doc.text('$', startX, baseY);
-    doc.setFontSize(fsN);
-    doc.text(precioStr, startX + wS + wEsp, baseY);
+    ctx.fillStyle = '#FFE000';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
 
-    // ── AHORRO ──────────────────────────────────────
-    doc.setFillColor(255, 224, 0);
-    doc.rect(ox, ahY, W, ahH, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(fsAh);
-    doc.setTextColor(...hexToRgb(c.header));
-    doc.text('AHORRÁS $ ' + ahorro.toLocaleString('es-AR'), ox + W/2, ahY + ahH * 0.68, { align: 'center' });
+    // Signo $ — mismo baseline que número
+    ctx.font = `${fsS}px 'Bebas Neue', sans-serif`;
+    ctx.fillText('$', startX, baseY);
 
-    // ── VIGENCIA ────────────────────────────────────
-    const fsVig = Math.round(7 * escala);
-    doc.setFontSize(fsVig);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Válido hasta el ' + vigencia, ox + W/2, oy + H - 2, { align: 'center' });
+    ctx.font = `${fsP}px 'Bebas Neue', sans-serif`;
+    ctx.fillText(precioStr, startX + wSig + wEsp, baseY);
 
-    // ── LÍNEA DE CORTE (solo ½ A4) ──────────────────
-    if (isMedioLocal) {
-      doc.setDrawColor(180, 180, 180);
-      doc.setLineWidth(0.3);
-      doc.setLineDashPattern([3, 3], 0);
-      doc.line(0, oy + H, 210, oy + H);
-      doc.setLineDashPattern([], 0);
+    // ── AHORRO ───────────────────────────────────────
+    ctx.fillStyle = '#FFE000';
+    ctx.fillRect(ox, aY, W, aH);
+    ctx.fillStyle = c.header;
+    const fsAH = Math.round(fsAho * H/CH);
+    ctx.font = `700 ${fsAH}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('AHORRÁS $ ' + ahorro.toLocaleString('es-AR'), ox + W/2, aY + aH/2);
+
+    // ── VIGENCIA ─────────────────────────────────────
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    const fsV = Math.round(fsVig * H/CH);
+    ctx.font = `400 ${fsV}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Válido hasta el ' + vigencia, ox + W/2, aY + aH + vigH/2);
+
+    // ── LÍNEA DE CORTE (½ A4) ────────────────────────
+    if (isMedio && oy === 0) {
+      ctx.save();
+      ctx.setLineDash([20, 20]);
+      ctx.strokeStyle = 'rgba(180,180,180,0.6)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, CH);
+      ctx.lineTo(canvasW, CH);
+      ctx.stroke();
+      ctx.restore();
     }
   }
 
   if (isMedio) {
-    // DOS carteles en A4 vertical — cada uno 210×148.5mm
-    dibujarOferta(0, 0,      210, 148.5);
-    dibujarOferta(0, 148.5,  210, 148.5);
+    dibujarCartel(0, 0,  CW, CH);
+    dibujarCartel(0, CH, CW, CH);
   } else {
-    // UN cartel en A4 completo
-    dibujarOferta(0, 0, 210, 297);
+    dibujarCartel(0, 0, CW, CH);
   }
 
-  doc.save('oferta_' + new Date().toISOString().slice(0,10) + '.pdf');
-  toast('PDF de oferta descargado');
+  // Descargar PNG
+  canvas.toBlob(blob => {
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'oferta_' + new Date().toISOString().slice(0,10) + '.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✓ Imagen descargada — imprimí al 100%');
+  }, 'image/png');
 }
 
-// ── Combo ─────────────────────────────────────────────────────
-function setColorCombo(color, el) {
-  colorCombo = color;
-  combosData[comboTabActivo].color = color;
-  document.querySelectorAll('#co-color-opts .color-opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  actualizarCombo();
-}
-
-function setComboTab(idx, btn) {
-  // Guardar combo actual antes de cambiar
-  guardarComboActivo();
-  comboTabActivo = idx;
-  document.querySelectorAll('.combo-tab').forEach((b,i) => b.classList.toggle('active', i===idx));
-  // Cargar datos del combo seleccionado
-  cargarComboActivo();
-  actualizarCombo();
-}
-
-function guardarComboActivo() {
-  const rows = document.querySelectorAll('#combo-prods .prod-row');
-  const prods = [];
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll('input');
-    prods.push({ nombre: inputs[0].value.trim(), precio: parseFloat(inputs[1].value)||0 });
-  });
-  combosData[comboTabActivo] = {
-    cabecera: document.getElementById('co-cabecera').value,
-    color:    colorCombo,
-    prods,
-    precio:   parseFloat(document.getElementById('co-precio').value)||0,
-    vigencia: document.getElementById('co-vigencia').value,
-  };
-}
-
-function cargarComboActivo() {
-  const d = combosData[comboTabActivo];
-  document.getElementById('co-cabecera').value = d.cabecera;
-  document.getElementById('co-precio').value   = d.precio || '';
-  document.getElementById('co-vigencia').value  = d.vigencia;
-  colorCombo = d.color;
-
-  // Color opts
-  const colorMap = {'azul':'#1a56a0','rojo':'#CC0000','verde':'#1a7a3c'};
-  document.querySelectorAll('#co-color-opts .color-opt').forEach(el => {
-    const isSelected = el.style.background === colorMap[d.color] ||
-      el.getAttribute('title')?.toLowerCase() === d.color;
-    el.classList.toggle('selected', isSelected);
-  });
-
-  // Productos
-  const rows = document.querySelectorAll('#combo-prods .prod-row');
-  rows.forEach((row, i) => {
-    const inputs = row.querySelectorAll('input');
-    inputs[0].value = d.prods[i]?.nombre || '';
-    inputs[1].value = d.prods[i]?.precio || '';
-  });
-}
-
-function actualizarCombo() {
-  // Actualizar stats del combo activo
-  const rows   = document.querySelectorAll('#combo-prods .prod-row');
-  let sepTotal = 0;
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll('input');
-    const prec   = parseFloat(inputs[1].value) || 0;
-    sepTotal += prec;
-  });
-  const precioCombo = parseFloat(document.getElementById('co-precio').value) || 0;
-  const ahorro      = sepTotal - precioCombo;
-  document.getElementById('co-sep').textContent    = sepTotal > 0 ? '$ ' + sepTotal.toLocaleString('es-AR') : '—';
-  document.getElementById('co-ahorro').textContent  = ahorro  > 0 ? '$ ' + ahorro.toLocaleString('es-AR')  : '—';
-
-  // Guardar estado actual antes de renderizar
-  guardarComboActivo();
-
-  // Renderizar hoja completa con los 4 combos
-  const hojaHTML = renderHojaComboPreview();
-  document.getElementById('combo-preview-wrap').innerHTML = hojaHTML;
-}
-
-function renderHojaComboPreview() {
-  // Hoja A4 apaisada: 4 combos A6 — escala reducida para preview
-  // Real: 297×210mm → preview: ~400×284px (escala ×1.35)
-  const ESC  = 1.1;
-  const CW   = Math.round(148.5 * ESC);
-  const CH   = Math.round(105   * ESC);
-
-  let html = `<div style="width:${CW*2}px;height:${CH*2}px;background:white;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:0.5px solid #ccc;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.12);">`;
-
-  combosData.forEach((d, idx) => {
-    const c      = COLORES[d.color] || COLORES.azul;
-    const prods  = d.prods.filter(p => p.nombre);
-    let   sepT   = d.prods.reduce((s,p) => s + (p.precio||0), 0);
-    const aho    = sepT - (d.precio||0);
-    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-    const fsP    = prods.length <= 2 ? 11 : prods.length === 3 ? 10 : 9;
-    const precStr = d.precio > 0 ? d.precio.toLocaleString('es-AR') : '—';
-    const fsCom  = precStr.length >= 6 ? 18 : precStr.length >= 5 ? 22 : 26;
-    const isActive = idx === comboTabActivo;
-    const outline  = isActive ? `outline:2px solid white;outline-offset:-2px;` : '';
-
-    html += `<div style="background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;${outline}">
-      <div style="background:${c.header};text-align:center;padding:4px;flex-shrink:0;">
-        <span style="color:#FFE000;font-weight:900;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">${d.cabecera}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 48px;flex:1;overflow:hidden;">
-        <div style="display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;">
-          <div style="padding:5px 6px;display:flex;flex-direction:column;gap:3px;flex:1;">
-            ${prods.length > 0 ? prods.map(p => `
-              <div style="display:flex;align-items:baseline;gap:3px;">
-                <span style="color:#FFE000;font-size:10px;font-weight:900;flex-shrink:0;">•</span>
-                <span style="color:white;font-size:${fsP}px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
-                ${p.precio>0?`<span style="color:rgba(255,255,255,0.4);font-size:8px;text-decoration:line-through;flex-shrink:0;">$${p.precio.toLocaleString('es-AR')}</span>`:''}
-              </div>`).join('') : '<div style="color:rgba(255,255,255,0.3);font-size:10px;padding:4px;">Sin productos</div>'}
-          </div>
-          <div>
-            <div style="background:#FFE000;text-align:center;padding:2px 4px;">
-              <span style="color:${c.header};font-size:8px;font-weight:900;text-transform:uppercase;">Ahorrás $${aho>0?aho.toLocaleString('es-AR'):'—'}</span>
-            </div>
-            <div style="text-align:center;padding:2px;">
-              <span style="color:rgba(255,255,255,0.55);font-size:7px;">Hasta ${vigencia}</span>
-            </div>
-          </div>
-        </div>
-        <div style="background:#FFE000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;gap:1px;">
-          <div style="font-size:6px;font-weight:900;color:${c.header};text-transform:uppercase;">Combo</div>
-          <div style="font-size:8px;font-weight:700;color:#999;text-decoration:line-through;">$${sepT>0?sepT.toLocaleString('es-AR'):'—'}</div>
-          <div style="display:flex;align-items:baseline;gap:1px;">
-            <span style="font-size:10px;font-weight:900;color:${c.header};">$</span>
-            <span style="font-size:${fsCom}px;font-weight:900;color:${c.header};line-height:1;letter-spacing:-1px;">${precStr}</span>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  });
-
-  // Líneas de corte
-  html += `<div style="position:absolute;top:50%;left:0;width:100%;height:1px;background:repeating-linear-gradient(90deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;"></div>`;
-  html += `<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:repeating-linear-gradient(180deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;"></div>`;
-  html += '</div>';
-
-  return html;
-}
-
-function imprimirCombo() {
-  const nombre = document.getElementById('co-nombre').value;
-  const precio = parseFloat(document.getElementById('co-precio').value) || 0;
-  if (!nombre || !precio) { toast('Completá nombre y precio del combo', true); return; }
-  toast('Generando PDF de combo...');
-  if (typeof window.jspdf === 'undefined') {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload = generarPDFCombo;
-    document.head.appendChild(script);
-  } else {
-    generarPDFCombo();
-  }
-}
 
 function generarPDFCombo() {
   const { jsPDF } = window.jspdf;
