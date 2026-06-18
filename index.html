@@ -1702,190 +1702,219 @@ function imprimirCombo() {
 function generarPNGCombo() {
   const DPI   = 300;
   const MM2PX = DPI / 25.4;
-  // A4 apaisada: 297×210mm → cada combo A6: 148.5×105mm
-  const CW  = Math.round(148.5 * MM2PX); // 1754px
-  const CH  = Math.round(105   * MM2PX); // 1240px
-  const canvasW = CW * 2;
-  const canvasH = CH * 2;
-
-  // Escala desde valores del mockup (preview ~163×115px por cartel)
-  const ESC = CW / 163;
-
+  // A4 apaisada: 297×210mm → 4 combos A6: 148.5×105mm cada uno
+  const CW = Math.round(148.5 * MM2PX); // ~1754px ancho por combo
+  const CH = Math.round(105   * MM2PX); // ~1240px alto por combo
   const canvas = document.createElement('canvas');
-  canvas.width  = canvasW;
-  canvas.height = canvasH;
+  canvas.width  = CW * 2;
+  canvas.height = CH * 2;
   const ctx = canvas.getContext('2d');
 
   // Fondo blanco
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvasW, canvasH);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Medidas internas — absolutas en px (no escaladas desde mockup)
+  // Panel precio: 30% del ancho del combo
+  const precW = Math.round(CW * 0.30);   // ~526px
+  const hH    = Math.round(CH * 0.11);   // ~136px cabecera
+  const ahoH  = Math.round(CH * 0.10);   // ~124px franja ahorro bottom
+  const vigH  = Math.round(CH * 0.08);   // ~99px vigencia
+  const pad   = Math.round(CW * 0.025);  // ~44px padding
+
+  // Fuentes en px — proporcionales al cartel
+  const fsCab  = Math.round(CH * 0.09);  // cabecera
+  const fsNom  = Math.round(CH * 0.08);  // nombre producto
+  const fsPrc  = Math.round(CH * 0.065); // precio tachado junto al nombre
+  const fsAho  = Math.round(CH * 0.07);  // AHORRÁS
+  const fsVig  = Math.round(CH * 0.055); // vigencia
 
   const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
-  const hexToRgb = hex => [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
 
   posiciones.forEach(([ox, oy], idx) => {
     const d = combosData[idx];
-    const tieneContenido = d.prods.some(p => p.nombre) && d.precio > 0;
+    const prods = d.prods.filter(p => p.nombre.trim());
+    const tieneContenido = prods.length > 0 && d.precio > 0;
 
     if (!tieneContenido) {
-      // Celda vacía — blanco con borde suave
-      ctx.strokeStyle = '#EEEEEE';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(ox+2, oy+2, CW-4, CH-4);
+      // Celda vacía — blanco con borde punteado
+      ctx.save();
+      ctx.setLineDash([16, 16]);
+      ctx.strokeStyle = '#DDDDDD';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(ox + 4, oy + 4, CW - 8, CH - 8);
+      ctx.restore();
       return;
     }
 
-    const c      = COLORES[d.color] || COLORES.azul;
-    const prods  = d.prods.filter(p => p.nombre);
+    const c        = COLORES[d.color] || COLORES.azul;
     const sepTotal = d.prods.reduce((s,p) => s+(p.precio||0), 0);
     const ahorro   = sepTotal - d.precio;
-    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
     const precStr  = d.precio.toLocaleString('es-AR');
+    const vigencia = d.vigencia
+      ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
+      : '—';
 
-    const pad    = Math.round(20 * ESC);
-    const hH     = Math.round(28 * ESC);   // cabecera
-    const precW  = Math.round(88 * ESC);   // panel precio derecho
-    const ahoH   = Math.round(22 * ESC);   // franja ahorro
-    const vigH   = Math.round(18 * ESC);   // vigencia
+    // ── ZONAS ─────────────────────────────────────────────────
+    const zonaIzqW = CW - precW;   // zona productos + cabecera
+    const prodTop  = oy + hH;
+    const prodBot  = oy + CH - ahoH - vigH;
+    const prodH    = prodBot - prodTop;
 
-    // Fondo
+    // ── FONDO COMPLETO ────────────────────────────────────────
     ctx.fillStyle = c.fondo;
     ctx.fillRect(ox, oy, CW, CH);
 
-    // Cabecera
-    ctx.fillStyle = c.header;
-    ctx.fillRect(ox, oy, CW - precW, hH);
+    // ── PANEL PRECIO (fondo amarillo — dibujarlo primero) ─────
+    const pX = ox + zonaIzqW;
     ctx.fillStyle = '#FFE000';
-    ctx.font = `900 ${Math.round(20 * ESC)}px 'Oswald', sans-serif`;
+    ctx.fillRect(pX, oy, precW, CH);
+
+    // ── CABECERA IZQUIERDA ────────────────────────────────────
+    ctx.fillStyle = c.header;
+    ctx.fillRect(ox, oy, zonaIzqW, hH);
+    ctx.fillStyle = '#FFE000';
+    ctx.font = `900 ${fsCab}px 'Oswald', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(d.cabecera, ox + (CW - precW)/2, oy + hH/2);
+    ctx.fillText(d.cabecera, ox + zonaIzqW/2, oy + hH/2);
 
-    // Productos
-    const lineH = Math.round(24 * ESC);
-    const fsNom = Math.round(14 * ESC);
-    const fsPrec = Math.round(11 * ESC);
+    // ── PRODUCTOS ─────────────────────────────────────────────
+    const nProds = prods.length;
+    const lineH  = Math.floor(prodH / Math.max(nProds, 1));
+    const bulletX = ox + pad;
+    const nomX    = ox + pad * 2.2;
+    const maxNomW = zonaIzqW - pad * 2.2 - pad * 0.5;
+
     prods.forEach((p, i) => {
-      const py = oy + hH + pad*0.5 + i * lineH;
+      const midY = prodTop + i * lineH + lineH / 2;
+
       // Bullet
       ctx.fillStyle = '#FFE000';
-      ctx.font = `900 ${Math.round(16*ESC)}px Arial`;
+      ctx.font = `900 ${fsNom}px Arial`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('•', ox + pad*0.5, py + lineH/2);
-      // Nombre
+      ctx.fillText('•', bulletX, midY);
+
+      // Nombre — truncar si no entra
       ctx.fillStyle = '#FFFFFF';
       ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
       let nom = p.nombre;
-      const maxNomW = CW - precW - pad*2;
-      while (ctx.measureText(nom).width > maxNomW - Math.round(20*ESC) && nom.length > 3) nom = nom.slice(0,-2)+'…';
-      ctx.fillText(nom, ox + Math.round(20*ESC), py + lineH/2);
-      // Precio tachado
+      // Reservar espacio para precio si existe
+      const espacioNom = p.precio > 0 ? maxNomW * 0.60 : maxNomW;
+      while (ctx.measureText(nom).width > espacioNom && nom.length > 3)
+        nom = nom.slice(0,-2) + '…';
+      ctx.fillText(nom, nomX, midY);
+
+      // Precio tachado (alineado derecha de zona izquierda)
       if (p.precio > 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.font = `${fsPrec}px 'Oswald', sans-serif`;
+        const precTxt = '$ ' + p.precio.toLocaleString('es-AR');
+        ctx.font = `400 ${fsPrc}px 'Oswald', sans-serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
         ctx.textAlign = 'right';
-        const precTxt = '$'+p.precio.toLocaleString('es-AR');
-        const precX = ox + CW - precW - Math.round(6*ESC);
-        ctx.fillText(precTxt, precX, py + lineH/2);
-        // Línea tachado
+        const precRX = ox + zonaIzqW - pad;
+        ctx.fillText(precTxt, precRX, midY);
+        // Línea de tachado
         const tw = ctx.measureText(precTxt).width;
-        ctx.strokeStyle = 'rgba(255,100,100,0.8)';
-        ctx.lineWidth = Math.round(2*ESC);
+        ctx.strokeStyle = 'rgba(255,80,80,0.85)';
+        ctx.lineWidth = Math.max(2, Math.round(fsPrc * 0.07));
         ctx.beginPath();
-        ctx.moveTo(precX - tw, py + lineH/2 - fsPrec*0.1);
-        ctx.lineTo(precX, py + lineH/2 - fsPrec*0.1);
+        ctx.moveTo(precRX - tw, midY - fsPrc * 0.05);
+        ctx.lineTo(precRX,      midY - fsPrc * 0.05);
         ctx.stroke();
       }
     });
 
-    // Ahorro
+    // ── FRANJA AHORRO ─────────────────────────────────────────
     const ahY = oy + CH - ahoH - vigH;
     ctx.fillStyle = '#FFE000';
-    ctx.fillRect(ox, ahY, CW - precW, ahoH);
+    ctx.fillRect(ox, ahY, zonaIzqW, ahoH);
     ctx.fillStyle = c.header;
-    ctx.font = `700 ${Math.round(14*ESC)}px 'Oswald', sans-serif`;
+    ctx.font = `700 ${fsAho}px 'Oswald', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Ahorrás $'+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + (CW-precW)/2, ahY + ahoH/2);
+    let ahoTxt = 'Ahorrás $ ' + (ahorro > 0 ? ahorro.toLocaleString('es-AR') : '—');
+    while (ctx.measureText(ahoTxt).width > zonaIzqW - pad*2 && ahoTxt.length > 3)
+      ahoTxt = ahoTxt.slice(0,-2) + '…';
+    ctx.fillText(ahoTxt, ox + zonaIzqW/2, ahY + ahoH/2);
 
-    // Vigencia
-    ctx.fillStyle = 'rgba(255,255,255,0.65)';
-    ctx.font = `400 ${Math.round(10*ESC)}px 'Oswald', sans-serif`;
+    // ── VIGENCIA ──────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = `400 ${fsVig}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Válido hasta '+vigencia, ox + (CW-precW)/2, ahY + ahoH + vigH/2);
+    ctx.fillText('Válido hasta ' + vigencia, ox + zonaIzqW/2, ahY + ahoH + vigH/2);
 
-    // Panel precio
-    const pX = ox + CW - precW;
-    ctx.fillStyle = '#FFE000';
-    ctx.fillRect(pX, oy, precW, CH);
-
-    // Label COMBO
+    // ── PANEL PRECIO — contenido ──────────────────────────────
+    // Label
     ctx.fillStyle = c.header;
-    ctx.font = `700 ${Math.round(11*ESC)}px 'Oswald', sans-serif`;
+    ctx.font = `700 ${Math.round(CH*0.07)}px 'Oswald', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('COMBO', pX + precW/2, oy + Math.round(12*ESC));
+    ctx.fillText('COMBO', pX + precW/2, oy + Math.round(CH*0.03));
 
     // Precio anterior tachado
-    const antTxt = '$'+sepTotal.toLocaleString('es-AR');
-    ctx.font = `400 ${Math.round(13*ESC)}px 'Oswald', sans-serif`;
+    const fsPAnt = Math.round(CH * 0.075);
+    const antTxt = '$ ' + sepTotal.toLocaleString('es-AR');
+    ctx.font = `400 ${fsPAnt}px 'Oswald', sans-serif`;
     ctx.fillStyle = '#888888';
-    ctx.textBaseline = 'top';
-    const antY2 = oy + Math.round(28*ESC);
-    ctx.fillText(antTxt, pX + precW/2, antY2);
+    const antY = oy + Math.round(CH * 0.16);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(antTxt, pX + precW/2, antY);
     const antW = ctx.measureText(antTxt).width;
     ctx.strokeStyle = '#CC4444';
-    ctx.lineWidth = Math.round(2.5*ESC);
+    ctx.lineWidth = Math.max(3, Math.round(fsPAnt * 0.08));
     ctx.beginPath();
-    ctx.moveTo(pX + precW/2 - antW/2, antY2 + Math.round(7*ESC));
-    ctx.lineTo(pX + precW/2 + antW/2, antY2 + Math.round(7*ESC));
+    ctx.moveTo(pX + precW/2 - antW/2, antY);
+    ctx.lineTo(pX + precW/2 + antW/2, antY);
     ctx.stroke();
 
-    // Precio combo
-    let fsCombo = Math.round(38 * ESC);
-    let fsSig   = Math.round(16 * ESC);
+    // Precio combo — máximo que entre en el ancho del panel
+    let fsCombo = Math.round(CH * 0.28);
+    let fsSig   = Math.round(fsCombo * 0.38);
     ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`;
     let wNum = ctx.measureText(precStr).width;
     ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
     let wSig = ctx.measureText('$').width;
-    const wEsp = Math.round(4*ESC);
-    while ((wSig+wEsp+wNum) > precW - Math.round(8*ESC) && fsCombo > 16) {
-      fsCombo -= 2; fsSig = Math.round(fsCombo*0.42);
+    const wEsp = Math.round(precW * 0.04);
+    while ((wSig + wEsp + wNum) > precW - pad && fsCombo > 20) {
+      fsCombo -= 4; fsSig = Math.round(fsCombo * 0.38);
       ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
       ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;   wSig = ctx.measureText('$').width;
     }
-    const totalW = wSig + wEsp + wNum;
-    const startX = pX + (precW - totalW)/2;
-    const centerY = oy + hH + (CH - hH - ahoH) / 2 + fsCombo * 0.3;
+    const totalW  = wSig + wEsp + wNum;
+    const startX  = pX + (precW - totalW) / 2;
+    // Centrar verticalmente entre antY y ahoH del panel
+    const priceMidY = oy + Math.round(CH * 0.25) + (CH - Math.round(CH*0.25) - ahoH) / 2;
     ctx.fillStyle = c.header;
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
+    ctx.textBaseline = 'middle';
     ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
-    ctx.fillText('$', startX, centerY);
+    ctx.fillText('$', startX, priceMidY);
     ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`;
-    ctx.fillText(precStr, startX + wSig + wEsp, centerY);
+    ctx.fillText(precStr, startX + wSig + wEsp, priceMidY);
 
-    // Ahorro en panel
+    // Franja ahorro panel
     ctx.fillStyle = c.header;
     ctx.fillRect(pX, oy + CH - ahoH, precW, ahoH);
     ctx.fillStyle = '#FFE000';
-    ctx.font = `700 ${Math.round(11*ESC)}px 'Oswald', sans-serif`;
+    ctx.font = `700 ${Math.round(CH*0.065)}px 'Oswald', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    let ahoTxt = 'Ahorrás $'+(ahorro>0?ahorro.toLocaleString('es-AR'):'—');
-    while(ctx.measureText(ahoTxt).width > precW - Math.round(8*ESC) && ahoTxt.length > 3) ahoTxt = ahoTxt.slice(0,-2)+'…';
-    ctx.fillText(ahoTxt, pX + precW/2, oy + CH - ahoH/2);
+    let panelAhoTxt = '$ ' + (ahorro > 0 ? ahorro.toLocaleString('es-AR') : '—');
+    while (ctx.measureText(panelAhoTxt).width > precW - pad && panelAhoTxt.length > 3)
+      panelAhoTxt = panelAhoTxt.slice(0,-2) + '…';
+    ctx.fillText(panelAhoTxt, pX + precW/2, oy + CH - ahoH/2);
   });
 
-  // Líneas de corte
+  // ── LÍNEAS DE CORTE ───────────────────────────────────────
   ctx.save();
-  ctx.setLineDash([20, 20]);
-  ctx.strokeStyle = 'rgba(150,150,150,0.5)';
-  ctx.lineWidth = 4;
+  ctx.setLineDash([24, 24]);
+  ctx.strokeStyle = 'rgba(140,140,140,0.45)';
+  ctx.lineWidth = 5;
   ctx.beginPath();
-  ctx.moveTo(0, CH); ctx.lineTo(canvasW, CH);
-  ctx.moveTo(CW, 0); ctx.lineTo(CW, canvasH);
+  ctx.moveTo(0, CH);       ctx.lineTo(CW*2, CH);
+  ctx.moveTo(CW, 0);       ctx.lineTo(CW,   CH*2);
   ctx.stroke();
   ctx.restore();
 
