@@ -1339,17 +1339,29 @@ function generarPNGOferta(nombreIn, normalIn, ofertaIn) {
   }
 
   if (isMedio) {
-    // Guardar oferta activa antes de generar
     guardarOfertaActiva();
-    // Dibujar cada oferta con sus propios datos
     [0,1].forEach((idx, pos) => {
       const d = ofertasData[idx];
-      // Sobrescribir temporalmente las variables del closure
-      nombre   = d.nombre   || nombre;
-      normal   = d.normal   || normal;
-      oferta   = d.oferta   || oferta;
+      // Si no tiene datos, dejar celda en blanco
+      if (!d.nombre || !d.oferta) {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, pos * CH, CW, CH);
+        // Línea de corte
+        if (pos === 0) {
+          ctx.save();
+          ctx.setLineDash([20,20]);
+          ctx.strokeStyle = 'rgba(150,150,150,0.4)';
+          ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(0, CH); ctx.lineTo(CW, CH); ctx.stroke();
+          ctx.restore();
+        }
+        return;
+      }
+      nombre   = d.nombre;
+      normal   = d.normal;
+      oferta   = d.oferta;
       ahorro   = d.normal - d.oferta;
-      cabecera = d.cabecera || cabecera;
+      cabecera = d.cabecera || 'OFERTA';
       c        = COLORES[d.color] || c;
       vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
       dibujarCartel(0, pos * CH, CW, CH);
@@ -1550,6 +1562,342 @@ function generarPDFCombo() {
 
   doc.save('combo_' + new Date().toISOString().slice(0,10) + '.pdf');
   toast('PDF de combo descargado');
+}
+
+
+// ── Combo — gestión de tabs ───────────────────────────────────
+function setComboTab(idx, btn) {
+  guardarComboActivo();
+  comboTabActivo = idx;
+  document.querySelectorAll('.combo-tab').forEach((b,i) => b.classList.toggle('active', i===idx));
+  cargarComboActivo();
+  actualizarCombo();
+}
+
+function guardarComboActivo() {
+  const rows = document.querySelectorAll('#combo-prods .prod-row');
+  const prods = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    prods.push({ nombre: inputs[0].value.trim(), precio: parseFloat(inputs[1].value)||0 });
+  });
+  combosData[comboTabActivo] = {
+    cabecera: document.getElementById('co-cabecera').value,
+    color:    colorCombo,
+    prods,
+    precio:   parseFloat(document.getElementById('co-precio').value)||0,
+    vigencia: document.getElementById('co-vigencia').value,
+  };
+}
+
+function cargarComboActivo() {
+  const d = combosData[comboTabActivo];
+  document.getElementById('co-cabecera').value = d.cabecera;
+  document.getElementById('co-precio').value   = d.precio || '';
+  document.getElementById('co-vigencia').value  = d.vigencia;
+  colorCombo = d.color;
+  const colorMap = {'azul':'#1a56a0','rojo':'#CC0000','verde':'#1a7a3c'};
+  document.querySelectorAll('#co-color-opts .color-opt').forEach(el => {
+    el.classList.toggle('selected', el.getAttribute('title')?.toLowerCase() === d.color);
+  });
+  const rows = document.querySelectorAll('#combo-prods .prod-row');
+  rows.forEach((row, i) => {
+    const inputs = row.querySelectorAll('input');
+    inputs[0].value = d.prods[i]?.nombre || '';
+    inputs[1].value = d.prods[i]?.precio || '';
+  });
+}
+
+// ── Combo — actualizar vista previa ──────────────────────────
+function actualizarCombo() {
+  const rows = document.querySelectorAll('#combo-prods .prod-row');
+  let sepTotal = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    sepTotal += parseFloat(inputs[1].value) || 0;
+  });
+  const precioCombo = parseFloat(document.getElementById('co-precio').value) || 0;
+  const ahorro = sepTotal - precioCombo;
+  document.getElementById('co-sep').textContent    = sepTotal > 0 ? '$ ' + sepTotal.toLocaleString('es-AR') : '—';
+  document.getElementById('co-ahorro').textContent  = ahorro  > 0 ? '$ ' + ahorro.toLocaleString('es-AR')  : '—';
+  guardarComboActivo();
+  document.getElementById('combo-preview-wrap').innerHTML = renderHojaComboPreview();
+}
+
+function renderHojaComboPreview() {
+  const ESC = 1.1;
+  const CW  = Math.round(148.5 * ESC);
+  const CH  = Math.round(105   * ESC);
+
+  let html = `<div style="width:${CW*2}px;height:${CH*2}px;background:white;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:0.5px solid #ccc;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.12);">`;
+
+  combosData.forEach((d, idx) => {
+    const tieneContenido = d.prods.some(p => p.nombre) && d.precio > 0;
+    if (!tieneContenido) {
+      // Cartel vacío — blanco con borde
+      html += `<div style="background:white;border:0.5px solid #eee;display:flex;align-items:center;justify-content:center;">
+        <span style="color:#ccc;font-size:11px;">Combo ${idx+1} vacío</span>
+      </div>`;
+      return;
+    }
+    const c      = COLORES[d.color] || COLORES.azul;
+    const prods  = d.prods.filter(p => p.nombre);
+    const sepT   = d.prods.reduce((s,p) => s + (p.precio||0), 0);
+    const aho    = sepT - (d.precio||0);
+    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+    const fsP    = prods.length <= 2 ? 11 : prods.length === 3 ? 10 : 9;
+    const precStr = d.precio > 0 ? d.precio.toLocaleString('es-AR') : '—';
+    const fsCom  = precStr.length >= 6 ? 18 : precStr.length >= 5 ? 22 : 26;
+    const isActive = idx === comboTabActivo;
+
+    html += `<div style="background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;${isActive?'outline:2px solid white;outline-offset:-2px;':''}">
+      <div style="background:${c.header};text-align:center;padding:4px;flex-shrink:0;">
+        <span style="color:#FFE000;font-weight:900;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">${d.cabecera}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 48px;flex:1;overflow:hidden;">
+        <div style="display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;">
+          <div style="padding:5px 6px;display:flex;flex-direction:column;gap:3px;flex:1;">
+            ${prods.map(p => `<div style="display:flex;align-items:baseline;gap:3px;">
+              <span style="color:#FFE000;font-size:10px;font-weight:900;flex-shrink:0;">•</span>
+              <span style="color:white;font-size:${fsP}px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
+              ${p.precio>0?`<span style="color:rgba(255,255,255,0.4);font-size:8px;text-decoration:line-through;flex-shrink:0;">$${p.precio.toLocaleString('es-AR')}</span>`:''}
+            </div>`).join('')}
+          </div>
+          <div>
+            <div style="background:#FFE000;text-align:center;padding:2px 4px;">
+              <span style="color:${c.header};font-size:8px;font-weight:900;text-transform:uppercase;">Ahorrás $${aho>0?aho.toLocaleString('es-AR'):'—'}</span>
+            </div>
+            <div style="text-align:center;padding:2px;">
+              <span style="color:rgba(255,255,255,0.55);font-size:7px;">Hasta ${vigencia}</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:#FFE000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;gap:1px;">
+          <div style="font-size:6px;font-weight:900;color:${c.header};text-transform:uppercase;">Combo</div>
+          <div style="font-size:8px;font-weight:700;color:#999;text-decoration:line-through;">$${sepT>0?sepT.toLocaleString('es-AR'):'—'}</div>
+          <div style="display:flex;align-items:baseline;gap:1px;">
+            <span style="font-size:10px;font-weight:900;color:${c.header};">$</span>
+            <span style="font-size:${fsCom}px;font-weight:900;color:${c.header};line-height:1;letter-spacing:-1px;">${precStr}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  html += `<div style="position:absolute;top:50%;left:0;width:100%;height:1px;background:repeating-linear-gradient(90deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;"></div>`;
+  html += `<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:repeating-linear-gradient(180deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;"></div>`;
+  html += '</div>';
+  return html;
+}
+
+// ── Combo — imprimir ─────────────────────────────────────────
+function imprimirCombo() {
+  const tieneDatos = combosData.some(d => d.prods.some(p => p.nombre) && d.precio > 0);
+  if (!tieneDatos) { toast('Completá al menos un combo antes de imprimir', true); return; }
+  toast('Generando imagen...');
+  guardarComboActivo();
+  document.fonts.ready.then(() => generarPNGCombo());
+}
+
+function generarPNGCombo() {
+  const DPI   = 300;
+  const MM2PX = DPI / 25.4;
+  // A4 apaisada: 297×210mm → cada combo A6: 148.5×105mm
+  const CW  = Math.round(148.5 * MM2PX); // 1754px
+  const CH  = Math.round(105   * MM2PX); // 1240px
+  const canvasW = CW * 2;
+  const canvasH = CH * 2;
+
+  // Escala desde valores del mockup (preview ~163×115px por cartel)
+  const ESC = CW / 163;
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = canvasW;
+  canvas.height = canvasH;
+  const ctx = canvas.getContext('2d');
+
+  // Fondo blanco
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
+  const hexToRgb = hex => [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+
+  posiciones.forEach(([ox, oy], idx) => {
+    const d = combosData[idx];
+    const tieneContenido = d.prods.some(p => p.nombre) && d.precio > 0;
+
+    if (!tieneContenido) {
+      // Celda vacía — blanco con borde suave
+      ctx.strokeStyle = '#EEEEEE';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(ox+2, oy+2, CW-4, CH-4);
+      return;
+    }
+
+    const c      = COLORES[d.color] || COLORES.azul;
+    const prods  = d.prods.filter(p => p.nombre);
+    const sepTotal = d.prods.reduce((s,p) => s+(p.precio||0), 0);
+    const ahorro   = sepTotal - d.precio;
+    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+    const precStr  = d.precio.toLocaleString('es-AR');
+
+    const pad    = Math.round(20 * ESC);
+    const hH     = Math.round(28 * ESC);   // cabecera
+    const precW  = Math.round(88 * ESC);   // panel precio derecho
+    const ahoH   = Math.round(22 * ESC);   // franja ahorro
+    const vigH   = Math.round(18 * ESC);   // vigencia
+
+    // Fondo
+    ctx.fillStyle = c.fondo;
+    ctx.fillRect(ox, oy, CW, CH);
+
+    // Cabecera
+    ctx.fillStyle = c.header;
+    ctx.fillRect(ox, oy, CW - precW, hH);
+    ctx.fillStyle = '#FFE000';
+    ctx.font = `900 ${Math.round(20 * ESC)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(d.cabecera, ox + (CW - precW)/2, oy + hH/2);
+
+    // Productos
+    const lineH = Math.round(24 * ESC);
+    const fsNom = Math.round(14 * ESC);
+    const fsPrec = Math.round(11 * ESC);
+    prods.forEach((p, i) => {
+      const py = oy + hH + pad*0.5 + i * lineH;
+      // Bullet
+      ctx.fillStyle = '#FFE000';
+      ctx.font = `900 ${Math.round(16*ESC)}px Arial`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('•', ox + pad*0.5, py + lineH/2);
+      // Nombre
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
+      let nom = p.nombre;
+      const maxNomW = CW - precW - pad*2;
+      while (ctx.measureText(nom).width > maxNomW - Math.round(20*ESC) && nom.length > 3) nom = nom.slice(0,-2)+'…';
+      ctx.fillText(nom, ox + Math.round(20*ESC), py + lineH/2);
+      // Precio tachado
+      if (p.precio > 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.font = `${fsPrec}px 'Oswald', sans-serif`;
+        ctx.textAlign = 'right';
+        const precTxt = '$'+p.precio.toLocaleString('es-AR');
+        const precX = ox + CW - precW - Math.round(6*ESC);
+        ctx.fillText(precTxt, precX, py + lineH/2);
+        // Línea tachado
+        const tw = ctx.measureText(precTxt).width;
+        ctx.strokeStyle = 'rgba(255,100,100,0.8)';
+        ctx.lineWidth = Math.round(2*ESC);
+        ctx.beginPath();
+        ctx.moveTo(precX - tw, py + lineH/2 - fsPrec*0.1);
+        ctx.lineTo(precX, py + lineH/2 - fsPrec*0.1);
+        ctx.stroke();
+      }
+    });
+
+    // Ahorro
+    const ahY = oy + CH - ahoH - vigH;
+    ctx.fillStyle = '#FFE000';
+    ctx.fillRect(ox, ahY, CW - precW, ahoH);
+    ctx.fillStyle = c.header;
+    ctx.font = `700 ${Math.round(14*ESC)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Ahorrás $'+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + (CW-precW)/2, ahY + ahoH/2);
+
+    // Vigencia
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.font = `400 ${Math.round(10*ESC)}px 'Oswald', sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Válido hasta '+vigencia, ox + (CW-precW)/2, ahY + ahoH + vigH/2);
+
+    // Panel precio
+    const pX = ox + CW - precW;
+    ctx.fillStyle = '#FFE000';
+    ctx.fillRect(pX, oy, precW, CH);
+
+    // Label COMBO
+    ctx.fillStyle = c.header;
+    ctx.font = `700 ${Math.round(11*ESC)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('COMBO', pX + precW/2, oy + Math.round(12*ESC));
+
+    // Precio anterior tachado
+    const antTxt = '$'+sepTotal.toLocaleString('es-AR');
+    ctx.font = `400 ${Math.round(13*ESC)}px 'Oswald', sans-serif`;
+    ctx.fillStyle = '#888888';
+    ctx.textBaseline = 'top';
+    const antY2 = oy + Math.round(28*ESC);
+    ctx.fillText(antTxt, pX + precW/2, antY2);
+    const antW = ctx.measureText(antTxt).width;
+    ctx.strokeStyle = '#CC4444';
+    ctx.lineWidth = Math.round(2.5*ESC);
+    ctx.beginPath();
+    ctx.moveTo(pX + precW/2 - antW/2, antY2 + Math.round(7*ESC));
+    ctx.lineTo(pX + precW/2 + antW/2, antY2 + Math.round(7*ESC));
+    ctx.stroke();
+
+    // Precio combo
+    let fsCombo = Math.round(38 * ESC);
+    let fsSig   = Math.round(16 * ESC);
+    ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`;
+    let wNum = ctx.measureText(precStr).width;
+    ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
+    let wSig = ctx.measureText('$').width;
+    const wEsp = Math.round(4*ESC);
+    while ((wSig+wEsp+wNum) > precW - Math.round(8*ESC) && fsCombo > 16) {
+      fsCombo -= 2; fsSig = Math.round(fsCombo*0.42);
+      ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
+      ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;   wSig = ctx.measureText('$').width;
+    }
+    const totalW = wSig + wEsp + wNum;
+    const startX = pX + (precW - totalW)/2;
+    const centerY = oy + hH + (CH - hH - ahoH) / 2 + fsCombo * 0.3;
+    ctx.fillStyle = c.header;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
+    ctx.fillText('$', startX, centerY);
+    ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`;
+    ctx.fillText(precStr, startX + wSig + wEsp, centerY);
+
+    // Ahorro en panel
+    ctx.fillStyle = c.header;
+    ctx.fillRect(pX, oy + CH - ahoH, precW, ahoH);
+    ctx.fillStyle = '#FFE000';
+    ctx.font = `700 ${Math.round(11*ESC)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    let ahoTxt = 'Ahorrás $'+(ahorro>0?ahorro.toLocaleString('es-AR'):'—');
+    while(ctx.measureText(ahoTxt).width > precW - Math.round(8*ESC) && ahoTxt.length > 3) ahoTxt = ahoTxt.slice(0,-2)+'…';
+    ctx.fillText(ahoTxt, pX + precW/2, oy + CH - ahoH/2);
+  });
+
+  // Líneas de corte
+  ctx.save();
+  ctx.setLineDash([20, 20]);
+  ctx.strokeStyle = 'rgba(150,150,150,0.5)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0, CH); ctx.lineTo(canvasW, CH);
+  ctx.moveTo(CW, 0); ctx.lineTo(CW, canvasH);
+  ctx.stroke();
+  ctx.restore();
+
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'combos_' + new Date().toISOString().slice(0,10) + '.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✓ Imagen descargada — imprimí al 100%');
+  }, 'image/png');
 }
 
 // ── Info sistema ──────────────────────────────────────────────
