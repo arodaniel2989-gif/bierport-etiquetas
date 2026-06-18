@@ -1111,91 +1111,103 @@ function generarPDFOferta(nombre, normal, oferta) {
   // dibujarOferta: dibuja un cartel en la zona (ox, oy, W, H) del documento
   function dibujarOferta(ox, oy, W, H) {
     const pad = 4;
+    const isMedioLocal = H < 200; // medio A4 si alto < 200mm
 
-    // Fondo
+    // Escala relativa: A4 completo = H=297, medio = H=148.5
+    // Valores aprobados para A4 completo, escalados para medio
+    const escala  = H / 297;
+
+    // ── FONDO ───────────────────────────────────────
     doc.setFillColor(...hexToRgb(c.fondo));
     doc.rect(ox, oy, W, H, 'F');
 
     // ── HEADER ──────────────────────────────────────
-    const hH = Math.round(H * 0.13);
+    const hH    = 35.7 * escala;          // aprobado: 50px → 35.7mm en A4
+    const fsCab = Math.round(20 * escala); // aprobado: ~20pt en A4
     doc.setFillColor(...hexToRgb(c.header));
     doc.rect(ox, oy, W, hH, 'F');
     doc.setFont('helvetica', 'bold');
-    const fsCab = Math.round(H * 0.075);
     doc.setFontSize(fsCab);
     doc.setTextColor(255, 224, 0);
     doc.text(cabecera, ox + W/2, oy + hH * 0.72, { align: 'center' });
 
     // ── NOMBRE ──────────────────────────────────────
-    const fsNom = Math.round(H * 0.075);
+    const fsNom = Math.round(18 * escala); // aprobado: 18pt en A4
     doc.setFontSize(fsNom);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    // Truncar si no entra
     let nom = nombre;
     while (doc.getTextWidth(nom) > W - pad*2 && nom.length > 3) nom = nom.slice(0,-2) + '…';
-    doc.text(nom, ox + W/2, oy + hH + fsNom * 0.6, { align: 'center' });
+    const nomY = oy + hH + fsNom * 0.8;
+    doc.text(nom, ox + W/2, nomY, { align: 'center' });
 
     // ── ANTES ───────────────────────────────────────
-    const fsAntes = Math.round(H * 0.055);
+    const fsAntes = Math.round(8 * escala); // aprobado: 8pt en A4
     doc.setFontSize(fsAntes);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 170, 170);
-    const antY = oy + hH + fsNom * 0.6 + fsAntes * 1.0;
+    const antY = nomY + fsAntes * 1.4;
     doc.text('ANTES  $ ' + normal.toLocaleString('es-AR'), ox + W/2, antY, { align: 'center' });
+
+    // ── AHORRO — definir zona antes del precio ──────
+    const ahH = 31.4 * escala;            // aprobado: 44px → 31.4mm en A4
+    const fsAh = Math.round(12 * escala); // aprobado: ~12pt en A4
+    const vigH = 8 * escala;
+    const ahY  = oy + H - ahH - vigH;
 
     // ── PRECIO NUEVO — protagonista ─────────────────
     const precioStr = oferta.toLocaleString('es-AR');
-    // Máximo font que entra en el ancho: W-pad*2 disponible
-    // Cada char Arial Bold ~0.58 × fs × 0.3528mm por pt
-    // "10.900" = 6 chars + signo ~2: total ~8 equiv chars
-    // fs × 8 × 0.58 × 0.3528 < W - pad*2
-    const nChars  = precioStr.length + 2; // +2 por el "$"
-    const maxFsN  = Math.floor((W - pad*2) / (nChars * 0.58 * 0.3528));
-    const fsN     = Math.min(maxFsN, Math.round(H * 0.32)); // limitado al 32% del alto
-    const fsS     = Math.round(fsN * 0.42);
 
+    // Valores aprobados: 84pt número, 36pt signo (para A4 completo)
+    // Verificar que entren en el ancho disponible
+    let fsN = Math.round(84 * escala);
+    let fsS = Math.round(36 * escala);
+
+    // Ajustar si no entra en el ancho
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 224, 0);
-
-    doc.setFontSize(fsS);
-    const wS = doc.getTextWidth('$');
-    const wEsp = 1.5;
     doc.setFontSize(fsN);
-    const wN = doc.getTextWidth(precioStr);
-    const totalW = wS + wEsp + wN;
-    const px = ox + (W - totalW) / 2;
+    let wN = doc.getTextWidth(precioStr);
+    doc.setFontSize(fsS);
+    let wS = doc.getTextWidth('$');
+    const wEsp = 2;
+    const maxW = W - pad * 2;
+    while ((wS + wEsp + wN) > maxW && fsN > 20) {
+      fsN -= 2; fsS = Math.round(fsN * 0.43);
+      doc.setFontSize(fsN); wN = doc.getTextWidth(precioStr);
+      doc.setFontSize(fsS); wS = doc.getTextWidth('$');
+    }
 
-    // Zona precio: entre "antes" y franja ahorro
-    const ahH    = Math.round(H * 0.1);
-    const ahY    = oy + H - ahH - Math.round(H * 0.07);
-    const zonaTop    = antY + 3;
+    const totalW  = wS + wEsp + wN;
+    const startX  = ox + (W - totalW) / 2;
+
+    // Centrar verticalmente entre ANTES y AHORRO
+    const zonaTop    = antY + 4;
     const zonaBottom = ahY - 2;
-    const altN   = fsN * 0.3528;
-    const baseY  = zonaBottom - (zonaBottom - zonaTop - altN) / 2;
+    const altN       = fsN * 0.3528;
+    const baseY      = zonaBottom - (zonaBottom - zonaTop - altN) / 2;
 
-    // $ con la base alineada al número (mismo baseline)
+    doc.setTextColor(255, 224, 0);
     doc.setFontSize(fsS);
-    doc.text('$', px, baseY);
+    doc.text('$', startX, baseY);
     doc.setFontSize(fsN);
-    doc.text(precioStr, px + wS + wEsp, baseY);
+    doc.text(precioStr, startX + wS + wEsp, baseY);
 
     // ── AHORRO ──────────────────────────────────────
     doc.setFillColor(255, 224, 0);
     doc.rect(ox, ahY, W, ahH, 'F');
     doc.setFont('helvetica', 'bold');
-    const fsAh = Math.round(H * 0.048);
     doc.setFontSize(fsAh);
     doc.setTextColor(...hexToRgb(c.header));
     doc.text('AHORRÁS $ ' + ahorro.toLocaleString('es-AR'), ox + W/2, ahY + ahH * 0.68, { align: 'center' });
 
-    // ── VIGENCIA ─────────────────────────────────────
-    const fsVig = Math.round(H * 0.036);
+    // ── VIGENCIA ────────────────────────────────────
+    const fsVig = Math.round(7 * escala);
     doc.setFontSize(fsVig);
     doc.setTextColor(255, 255, 255);
-    doc.text('Válido hasta el ' + vigencia, ox + W/2, oy + H - Math.round(H * 0.025), { align: 'center' });
+    doc.text('Válido hasta el ' + vigencia, ox + W/2, oy + H - 2, { align: 'center' });
 
-    // Línea de corte entre los dos carteles (solo en medio)
-    if (isMedio) {
+    // ── LÍNEA DE CORTE (solo ½ A4) ──────────────────
+    if (isMedioLocal) {
       doc.setDrawColor(180, 180, 180);
       doc.setLineWidth(0.3);
       doc.setLineDashPattern([3, 3], 0);
