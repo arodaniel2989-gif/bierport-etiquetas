@@ -291,8 +291,8 @@
     <div class="tab active" onclick="setTabGondola(this,'gondola')">Etiqueta góndola · 70×34 mm</div>
   </div>
   <div class="tabs" id="tabs-oferta" style="display:none">
-    <div class="tab active" onclick="setTabOferta('medio')">½ A4 apaisado · 210×148 mm</div>
-    <div class="tab" onclick="setTabOferta('completo')">A4 completo · 210×297 mm</div>
+    <div class="tab active" onclick="setTabOferta('medio')">½ A4 — 2 ofertas por hoja</div>
+    <div class="tab" onclick="setTabOferta('completo')">A4 completo — 1 oferta</div>
   </div>
   <div class="tabs" id="tabs-combo" style="display:none">
     <div class="tab active">Combo A6 · 4 por hoja A4 apaisada</div>
@@ -385,66 +385,88 @@
   <!-- MÓDULO OFERTA -->
   <div class="modulo" id="mod-oferta">
     <div class="oferta-layout">
-      <div class="oferta-form">
+      <div class="oferta-form" style="width:100%;display:flex;flex-direction:column;gap:12px;overflow-y:auto;">
 
-        <div class="form-card">
-          <div class="form-title">Producto</div>
-          <div class="input-wrap" style="margin-bottom:8px">
-            <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="of-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto..." oninput="buscarOferta(this.value)">
+        <!-- Tabs solo visibles en ½ A4 -->
+        <div id="oferta-tabs-selector" style="display:none;gap:4px;flex-shrink:0;">
+          <button class="combo-tab active" onclick="setOfertaTab(0,this)">Oferta 1</button>
+          <button class="combo-tab" onclick="setOfertaTab(1,this)">Oferta 2</button>
+        </div>
+
+        <div style="display:flex;gap:12px;flex:1;min-height:0;overflow-y:auto;">
+          <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:260px;">
+
+            <div class="form-card">
+              <div class="form-title">Producto</div>
+              <div class="input-wrap" style="margin-bottom:8px">
+                <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" id="of-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto..." oninput="buscarOferta(this.value)">
+              </div>
+              <div id="of-resultados" style="display:none; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:8px;"></div>
+              <div class="form-group">
+                <label class="form-label">Nombre en el cartel</label>
+                <input type="text" class="form-input" id="of-nombre" placeholder="Ej: Pepsi Cola 2,25 L" oninput="guardarOfertaActiva();actualizarOferta()">
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-title">Precios</div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Precio normal ($)</label>
+                  <input type="number" class="form-input" id="of-precio-normal" placeholder="2200" oninput="guardarOfertaActiva();actualizarOferta()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Precio oferta ($)</label>
+                  <input type="number" class="form-input" id="of-precio-oferta" placeholder="1900" oninput="guardarOfertaActiva();actualizarOferta()">
+                </div>
+              </div>
+              <div class="info-row" style="padding:6px 0 0">
+                <span>Ahorrás</span>
+                <span id="of-ahorro" style="font-weight:700;color:var(--success)">—</span>
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-title">Diseño</div>
+              <div class="form-group">
+                <label class="form-label">Cabecera</label>
+                <select class="form-input" id="of-cabecera" onchange="guardarOfertaActiva();actualizarOferta()">
+                  <option>OFERTA</option>
+                  <option>PRECIO ESPECIAL</option>
+                  <option>¡APROVECHÁ!</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Color</label>
+                <div class="color-opts" id="of-color-opts">
+                  <div class="color-opt selected" style="background:#CC0000" onclick="setColorOferta('rojo',this)" title="Rojo"></div>
+                  <div class="color-opt" style="background:#1a56a0" onclick="setColorOferta('azul',this)" title="Azul"></div>
+                  <div class="color-opt" style="background:#1a7a3c" onclick="setColorOferta('verde',this)" title="Verde"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Válido hasta</label>
+                <input type="date" class="form-input" id="of-vigencia" onchange="guardarOfertaActiva();actualizarOferta()">
+              </div>
+            </div>
+
           </div>
-          <div id="of-resultados" style="display:none; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:8px;"></div>
-          <div class="form-group">
-            <label class="form-label">Nombre en el cartel</label>
-            <input type="text" class="form-input" id="of-nombre" placeholder="Ej: Pepsi Cola 2,25 L">
+
+          <!-- Vista previa -->
+          <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+            <div class="form-card" style="flex:1;display:flex;flex-direction:column;">
+              <div class="form-title">Vista previa</div>
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);border-radius:var(--radius);">
+                <div id="oferta-preview-wrap"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="form-card">
-          <div class="form-title">Precios</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Precio normal ($)</label>
-              <input type="number" class="form-input" id="of-precio-normal" placeholder="2200" oninput="actualizarOferta()">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Precio oferta ($)</label>
-              <input type="number" class="form-input" id="of-precio-oferta" placeholder="1900" oninput="actualizarOferta()">
-            </div>
-          </div>
-          <div class="info-row" style="padding:6px 0 0">
-            <span>Ahorrás</span>
-            <span id="of-ahorro" style="font-weight:700;color:var(--success)">—</span>
-          </div>
-        </div>
-
-        <div class="form-card">
-          <div class="form-title">Diseño</div>
-          <div class="form-group">
-            <label class="form-label">Cabecera</label>
-            <select class="form-input" id="of-cabecera" onchange="actualizarOferta()">
-              <option>OFERTA</option>
-              <option>PRECIO ESPECIAL</option>
-              <option>¡APROVECHÁ!</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Color</label>
-            <div class="color-opts">
-              <div class="color-opt selected" style="background:#CC0000" onclick="setColorOferta('rojo',this)" title="Rojo"></div>
-              <div class="color-opt" style="background:#1a56a0" onclick="setColorOferta('azul',this)" title="Azul"></div>
-              <div class="color-opt" style="background:#1a7a3c" onclick="setColorOferta('verde',this)" title="Verde"></div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Válido hasta</label>
-            <input type="date" class="form-input" id="of-vigencia" onchange="actualizarOferta()">
-          </div>
-        </div>
-
-        <button class="btn-primary" onclick="imprimirOferta()">
+        <button class="btn-primary" onclick="imprimirOferta()" style="flex-shrink:0;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Generar PDF de oferta
+          <span id="btn-oferta-txt">Generar imagen</span>
         </button>
       </div>
 
@@ -608,6 +630,13 @@ let scanBuffer    = '';
 let scanTimer     = null;
 let colorOferta   = 'rojo';
 let colorCombo    = 'azul';
+let ofertaTabActivo = 0;
+
+// Estado de las 2 ofertas para ½ A4
+const ofertasData = [0,1].map(() => ({
+  nombre: '', normal: 0, oferta: 0,
+  cabecera: 'OFERTA', color: 'rojo', vigencia: ''
+}));
 let comboTabActivo = 0;
 
 // Estado de los 4 combos
@@ -654,7 +683,50 @@ function setTabOferta(tam) {
   document.querySelectorAll('#tabs-oferta .tab').forEach((t,i) => {
     t.classList.toggle('active', (tam==='medio' && i===0)||(tam==='completo' && i===1));
   });
+  // Mostrar/ocultar selector de oferta 1/2 según el formato
+  const sel = document.getElementById('oferta-tabs-selector');
+  if (sel) sel.style.display = tam === 'medio' ? 'flex' : 'none';
+  // Actualizar texto del botón
+  const btnTxt = document.getElementById('btn-oferta-txt');
+  if (btnTxt) btnTxt.textContent = tam === 'medio' ? 'Generar imagen — 2 ofertas' : 'Generar imagen';
+  // Resetear tab activo al cambiar formato
+  ofertaTabActivo = 0;
+  document.querySelectorAll('.oferta-tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  cargarOfertaActiva();
   actualizarOferta();
+}
+
+function setOfertaTab(idx, btn) {
+  guardarOfertaActiva();
+  ofertaTabActivo = idx;
+  btn.closest('div').querySelectorAll('.combo-tab').forEach((b,i) => b.classList.toggle('active', i===idx));
+  cargarOfertaActiva();
+  actualizarOferta();
+}
+
+function guardarOfertaActiva() {
+  ofertasData[ofertaTabActivo] = {
+    nombre:   document.getElementById('of-nombre').value,
+    normal:   parseFloat(document.getElementById('of-precio-normal').value) || 0,
+    oferta:   parseFloat(document.getElementById('of-precio-oferta').value) || 0,
+    cabecera: document.getElementById('of-cabecera').value,
+    color:    colorOferta,
+    vigencia: document.getElementById('of-vigencia').value,
+  };
+}
+
+function cargarOfertaActiva() {
+  const d = ofertasData[ofertaTabActivo];
+  document.getElementById('of-nombre').value        = d.nombre;
+  document.getElementById('of-precio-normal').value = d.normal || '';
+  document.getElementById('of-precio-oferta').value = d.oferta || '';
+  document.getElementById('of-cabecera').value      = d.cabecera;
+  document.getElementById('of-vigencia').value      = d.vigencia;
+  colorOferta = d.color;
+  const colorMap = {'rojo':'#CC0000','azul':'#1a56a0','verde':'#1a7a3c'};
+  document.querySelectorAll('#of-color-opts .color-opt').forEach(el => {
+    el.classList.toggle('selected', el.getAttribute('title')?.toLowerCase() === d.color);
+  });
 }
 
 // ── Búsqueda ──────────────────────────────────────────────────
@@ -1020,13 +1092,15 @@ function seleccionarOferta(p) {
   document.getElementById('of-precio-normal').value = p.precioConIVA;
   document.getElementById('of-busqueda').value = p.nombre;
   document.getElementById('of-resultados').style.display = 'none';
+  guardarOfertaActiva();
   actualizarOferta();
 }
 
 function setColorOferta(color, el) {
   colorOferta = color;
-  document.querySelectorAll('#mod-oferta .color-opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('#of-color-opts .color-opt').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
+  guardarOfertaActiva();
   actualizarOferta();
 }
 
@@ -1088,13 +1162,14 @@ function imprimirOferta() {
   document.fonts.ready.then(() => generarPNGOferta(nombre, normal, oferta));
 }
 
-function generarPNGOferta(nombre, normal, oferta) {
+function generarPNGOferta(nombreIn, normalIn, ofertaIn) {
+  let nombre = nombreIn, normal = normalIn, oferta = ofertaIn;
   const isMedio  = tamañoOferta === 'medio';
-  const c        = COLORES[colorOferta];
-  const cabecera = document.getElementById('of-cabecera').value;
-  const vigEl    = document.getElementById('of-vigencia').value;
-  const vigencia = vigEl ? new Date(vigEl+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-  const ahorro   = normal - oferta;
+  let c        = COLORES[colorOferta];
+  let cabecera = document.getElementById('of-cabecera').value;
+  const vigEl  = document.getElementById('of-vigencia').value;
+  let vigencia = vigEl ? new Date(vigEl+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+  let ahorro   = normal - oferta;
 
   // Valores aprobados (en px CSS → escalar a 300dpi)
   // A4 a 300dpi: 2480×3508px  |  ½A4 (apaisado) a 300dpi: 2480×1748px
@@ -1111,7 +1186,13 @@ function generarPNGOferta(nombre, normal, oferta) {
   const canvasH = isMedio ? CH * 2 : CH;
 
   // Factor de escala desde valores aprobados (en cartel 273px = 210mm)
-  const ESC = CW / 273;  // 2480/273 ≈ 9.08
+  const ESC_W = CW / 273;  // escala basada en ancho (2480/273 ≈ 9.08)
+
+  // Para ½ A4 (apaisado): el cartel individual es 2480×1754px
+  // Los valores aprobados son para A4 completo (386px alto en pantalla)
+  // Escalar por el alto del cartel individual para que todo entre
+  const ESC_H = CH / 386;
+  const ESC   = isMedio ? Math.min(ESC_H, ESC_W * 0.88) : ESC_W;
 
   // Valores aprobados multiplicados por ESC
   const hdrH    = Math.round(46  * ESC);
@@ -1123,10 +1204,7 @@ function generarPNGOferta(nombre, normal, oferta) {
   const ahoH    = Math.round(44  * ESC);
   const fsAho   = Math.round(17  * ESC);
   const fsVig   = Math.round(10  * ESC);
-  const pad     = Math.round(16  * ESC);
-
-  // Escalar para ½ A4 (la mitad del alto)
-  const escMedio = isMedio ? 0.5 : 1;
+  const pad     = Math.round(16  * ESC_W);
 
   const canvas = document.createElement('canvas');
   canvas.width  = canvasW;
@@ -1261,8 +1339,21 @@ function generarPNGOferta(nombre, normal, oferta) {
   }
 
   if (isMedio) {
-    dibujarCartel(0, 0,  CW, CH);
-    dibujarCartel(0, CH, CW, CH);
+    // Guardar oferta activa antes de generar
+    guardarOfertaActiva();
+    // Dibujar cada oferta con sus propios datos
+    [0,1].forEach((idx, pos) => {
+      const d = ofertasData[idx];
+      // Sobrescribir temporalmente las variables del closure
+      nombre   = d.nombre   || nombre;
+      normal   = d.normal   || normal;
+      oferta   = d.oferta   || oferta;
+      ahorro   = d.normal - d.oferta;
+      cabecera = d.cabecera || cabecera;
+      c        = COLORES[d.color] || c;
+      vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+      dibujarCartel(0, pos * CH, CW, CH);
+    });
   } else {
     dibujarCartel(0, 0, CW, CH);
   }
@@ -1500,6 +1591,7 @@ function toast(msg, esError) {
 // ── Init ──────────────────────────────────────────────────────
 cargarInfo();
 cargarSecciones();
+cargarOfertaActiva();
 actualizarOferta();
 cargarComboActivo();
 actualizarCombo();
