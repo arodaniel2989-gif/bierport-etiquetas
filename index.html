@@ -1625,59 +1625,67 @@ function actualizarCombo() {
 }
 
 function renderHojaComboPreview() {
-  const ESC = 1.1;
-  const CW  = Math.round(148.5 * ESC);
-  const CH  = Math.round(105   * ESC);
+  // Preview a escala reducida — mismo layout que el PNG final
+  // Cartel: 296×210px en mockup → aquí usamos 222×157px (escala 0.75)
+  const CW = 222, CH = 157;
+
+  // Proporciones aprobadas (iguales al PNG)
+  const cabH  = Math.round(CH * 44/210);
+  const vigH  = Math.round(CH * 0.075);
+  const precH = Math.round(CH * 63/210);
+  const fsNom  = Math.round(CH * 14/210);
+  const fsPrec = Math.round(CH * 11/210);
+  const fsNum  = Math.round(CH * 60/210);
+  const fsSig  = Math.round(fsNum * 0.38);
+  const fsCab  = Math.round(CH * 25/210);
+  const mitad  = Math.round(CW * 0.45);
+  const pad    = Math.round(CW * 0.03);
 
   let html = `<div style="width:${CW*2}px;height:${CH*2}px;background:white;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:0.5px solid #ccc;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.12);">`;
 
   combosData.forEach((d, idx) => {
-    const tieneContenido = d.prods.some(p => p.nombre) && d.precio > 0;
+    const prods = d.prods.filter(p => p.nombre.trim());
+    const tieneContenido = prods.length > 0 && d.precio > 0;
+    const isActive = idx === comboTabActivo;
+    const outline  = isActive ? 'outline:2px solid rgba(255,255,255,0.8);outline-offset:-2px;' : '';
+
     if (!tieneContenido) {
-      // Cartel vacío — blanco con borde
-      html += `<div style="background:white;border:0.5px solid #eee;display:flex;align-items:center;justify-content:center;">
-        <span style="color:#ccc;font-size:11px;">Combo ${idx+1} vacío</span>
+      html += `<div style="background:white;display:flex;align-items:center;justify-content:center;border:0.5px solid #eee;${outline}">
+        <span style="color:#ccc;font-size:10px;">Combo ${idx+1} vacío</span>
       </div>`;
       return;
     }
-    const c      = COLORES[d.color] || COLORES.azul;
-    const prods  = d.prods.filter(p => p.nombre);
-    const sepT   = d.prods.reduce((s,p) => s + (p.precio||0), 0);
-    const aho    = sepT - (d.precio||0);
-    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-    const fsP    = prods.length <= 2 ? 11 : prods.length === 3 ? 10 : 9;
-    const precStr = d.precio > 0 ? d.precio.toLocaleString('es-AR') : '—';
-    const fsCom  = precStr.length >= 6 ? 18 : precStr.length >= 5 ? 22 : 26;
-    const isActive = idx === comboTabActivo;
 
-    html += `<div style="background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;${isActive?'outline:2px solid white;outline-offset:-2px;':''}">
-      <div style="background:${c.header};text-align:center;padding:4px;flex-shrink:0;">
-        <span style="color:#FFE000;font-weight:900;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">${d.cabecera}</span>
+    const c      = COLORES[d.color] || COLORES.azul;
+    const sepT   = d.prods.reduce((s,p) => s+(p.precio||0), 0);
+    const aho    = sepT - (d.precio||0);
+    const precStr = d.precio > 0 ? d.precio.toLocaleString('es-AR') : '—';
+    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+    const lineH  = Math.floor((CH - cabH - vigH - precH) / Math.max(prods.length,1));
+    const fsCom  = precStr.length >= 6 ? Math.round(fsNum*0.7) : fsNum;
+
+    html += `<div style="background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:'Oswald',Arial,sans-serif;${outline}">
+      <div style="background:${c.header};height:${cabH}px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="color:#FFE000;font-family:'Bebas Neue',sans-serif;font-size:${fsCab}px;letter-spacing:0.06em;">${d.cabecera}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 48px;flex:1;overflow:hidden;">
-        <div style="display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;">
-          <div style="padding:5px 6px;display:flex;flex-direction:column;gap:3px;flex:1;">
-            ${prods.map(p => `<div style="display:flex;align-items:baseline;gap:3px;">
-              <span style="color:#FFE000;font-size:10px;font-weight:900;flex-shrink:0;">•</span>
-              <span style="color:white;font-size:${fsP}px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
-              ${p.precio>0?`<span style="color:rgba(255,255,255,0.4);font-size:8px;text-decoration:line-through;flex-shrink:0;">$${p.precio.toLocaleString('es-AR')}</span>`:''}
-            </div>`).join('')}
-          </div>
-          <div>
-            <div style="background:#FFE000;text-align:center;padding:2px 4px;">
-              <span style="color:${c.header};font-size:8px;font-weight:900;text-transform:uppercase;">Ahorrás $${aho>0?aho.toLocaleString('es-AR'):'—'}</span>
-            </div>
-            <div style="text-align:center;padding:2px;">
-              <span style="color:rgba(255,255,255,0.55);font-size:7px;">Hasta ${vigencia}</span>
-            </div>
-          </div>
+      <div style="flex:1;padding:${pad}px ${pad}px 0;display:flex;flex-direction:column;gap:1px;overflow:hidden;">
+        ${prods.map(p => `<div style="display:flex;align-items:baseline;gap:3px;height:${lineH}px;align-items:center;">
+          <span style="color:#FFE000;font-size:${Math.round(fsNom*1.1)}px;font-weight:900;flex-shrink:0;line-height:1;">•</span>
+          <span style="color:white;font-size:${fsNom}px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
+          ${p.precio>0?`<span style="color:rgba(255,255,255,0.4);font-size:${fsPrec}px;text-decoration:line-through;flex-shrink:0;white-space:nowrap;">$${p.precio.toLocaleString('es-AR')}</span>`:''}
+        </div>`).join('')}
+      </div>
+      <div style="text-align:center;color:rgba(255,255,255,0.55);font-size:${Math.round(CH*0.055)}px;padding:1px 0;flex-shrink:0;">Hasta ${vigencia}</div>
+      <div style="height:${precH}px;display:flex;flex-shrink:0;">
+        <div style="width:${mitad}px;background:#FFE000;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+          <div style="font-size:${Math.round(CH*0.055)}px;font-weight:700;color:${c.header};text-transform:uppercase;letter-spacing:0.04em;">AHORRÁS</div>
+          <div style="font-size:${Math.round(CH*0.085)}px;font-weight:700;color:${c.header};">$${aho>0?aho.toLocaleString('es-AR'):'—'}</div>
         </div>
-        <div style="background:#FFE000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;gap:1px;">
-          <div style="font-size:6px;font-weight:900;color:${c.header};text-transform:uppercase;">Combo</div>
-          <div style="font-size:8px;font-weight:700;color:#999;text-decoration:line-through;">$${sepT>0?sepT.toLocaleString('es-AR'):'—'}</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
+          <div style="font-size:${Math.round(CH*0.06)}px;color:rgba(255,255,255,0.4);text-decoration:line-through;">$${sepT>0?sepT.toLocaleString('es-AR'):'—'}</div>
           <div style="display:flex;align-items:baseline;gap:1px;">
-            <span style="font-size:10px;font-weight:900;color:${c.header};">$</span>
-            <span style="font-size:${fsCom}px;font-weight:900;color:${c.header};line-height:1;letter-spacing:-1px;">${precStr}</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:${fsSig}px;color:#FFE000;">$</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:${fsCom}px;color:#FFE000;line-height:1;letter-spacing:-0.5px;">${precStr}</span>
           </div>
         </div>
       </div>
@@ -1702,9 +1710,10 @@ function imprimirCombo() {
 function generarPNGCombo() {
   const DPI   = 300;
   const MM2PX = DPI / 25.4;
-  // A4 apaisada: 297×210mm → 4 combos A6: 148.5×105mm cada uno
-  const CW = Math.round(148.5 * MM2PX); // ~1754px ancho por combo
-  const CH = Math.round(105   * MM2PX); // ~1240px alto por combo
+  // A4 apaisada: 297×210mm → 4 combos A6: 148.5×105mm
+  const CW = Math.round(148.5 * MM2PX); // 1754px
+  const CH = Math.round(105   * MM2PX); // 1240px
+
   const canvas = document.createElement('canvas');
   canvas.width  = CW * 2;
   canvas.height = CH * 2;
@@ -1714,20 +1723,16 @@ function generarPNGCombo() {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Medidas internas — absolutas en px (no escaladas desde mockup)
-  // Panel precio: 30% del ancho del combo
-  const precW = Math.round(CW * 0.30);   // ~526px
-  const hH    = Math.round(CH * 0.11);   // ~136px cabecera
-  const ahoH  = Math.round(CH * 0.10);   // ~124px franja ahorro bottom
-  const vigH  = Math.round(CH * 0.08);   // ~99px vigencia
-  const pad   = Math.round(CW * 0.025);  // ~44px padding
-
-  // Fuentes en px — proporcionales al cartel
-  const fsCab  = Math.round(CH * 0.09);  // cabecera
-  const fsNom  = Math.round(CH * 0.08);  // nombre producto
-  const fsPrc  = Math.round(CH * 0.065); // precio tachado junto al nombre
-  const fsAho  = Math.round(CH * 0.07);  // AHORRÁS
-  const fsVig  = Math.round(CH * 0.055); // vigencia
+  // Valores aprobados — proporcionales al alto del cartel
+  // Mockup: 210px alto → valores en px → factor = val/210
+  const cabH   = Math.round(CH * 44/210);   // cabecera
+  const fsCab  = Math.round(CH * 25/210);   // fuente cabecera
+  const fsNom  = Math.round(CH * 14/210);   // fuente nombre producto
+  const fsPrec = Math.round(CH * 11/210);   // fuente precio tachado
+  const fsNum  = Math.round(CH * 60/210);   // fuente precio combo
+  const fsSig  = Math.round(fsNum * 0.38);  // fuente signo $
+  const precH  = Math.round(CH * 63/210);   // alto zona precio inferior
+  const pad    = Math.round(CW * 0.025);    // padding lateral
 
   const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
 
@@ -1737,12 +1742,11 @@ function generarPNGCombo() {
     const tieneContenido = prods.length > 0 && d.precio > 0;
 
     if (!tieneContenido) {
-      // Celda vacía — blanco con borde punteado
       ctx.save();
-      ctx.setLineDash([16, 16]);
+      ctx.setLineDash([16,16]);
       ctx.strokeStyle = '#DDDDDD';
       ctx.lineWidth = 3;
-      ctx.strokeRect(ox + 4, oy + 4, CW - 8, CH - 8);
+      ctx.strokeRect(ox+4, oy+4, CW-4, CH-4);
       ctx.restore();
       return;
     }
@@ -1755,166 +1759,145 @@ function generarPNGCombo() {
       ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
       : '—';
 
-    // ── ZONAS ─────────────────────────────────────────────────
-    const zonaIzqW = CW - precW;   // zona productos + cabecera
-    const prodTop  = oy + hH;
-    const prodBot  = oy + CH - ahoH - vigH;
-    const prodH    = prodBot - prodTop;
-
-    // ── FONDO COMPLETO ────────────────────────────────────────
+    // ── FONDO ────────────────────────────────────────────────
     ctx.fillStyle = c.fondo;
     ctx.fillRect(ox, oy, CW, CH);
 
-    // ── PANEL PRECIO (fondo amarillo — dibujarlo primero) ─────
-    const pX = ox + zonaIzqW;
-    ctx.fillStyle = '#FFE000';
-    ctx.fillRect(pX, oy, precW, CH);
-
-    // ── CABECERA IZQUIERDA ────────────────────────────────────
+    // ── CABECERA — ancho completo ─────────────────────────────
     ctx.fillStyle = c.header;
-    ctx.fillRect(ox, oy, zonaIzqW, hH);
+    ctx.fillRect(ox, oy, CW, cabH);
     ctx.fillStyle = '#FFE000';
-    ctx.font = `900 ${fsCab}px 'Oswald', sans-serif`;
+    ctx.font = `900 ${fsCab}px 'Bebas Neue', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(d.cabecera, ox + zonaIzqW/2, oy + hH/2);
+    ctx.fillText(d.cabecera, ox + CW/2, oy + cabH/2);
 
-    // ── PRODUCTOS ─────────────────────────────────────────────
-    const nProds = prods.length;
-    const lineH  = Math.floor(prodH / Math.max(nProds, 1));
-    const bulletX = ox + pad;
-    const nomX    = ox + pad * 2.2;
-    const maxNomW = zonaIzqW - pad * 2.2 - pad * 0.5;
+    // ── ZONA PRODUCTOS ────────────────────────────────────────
+    const vigH   = Math.round(CH * 0.075);
+    const prodTop = oy + cabH;
+    const prodBot = oy + CH - precH - vigH;
+    const prodH   = prodBot - prodTop;
+    const nProds  = prods.length;
+    const lineH   = Math.floor(prodH / Math.max(nProds, 1));
 
     prods.forEach((p, i) => {
-      const midY = prodTop + i * lineH + lineH / 2;
+      const midY = prodTop + i * lineH + lineH/2;
 
       // Bullet
       ctx.fillStyle = '#FFE000';
-      ctx.font = `900 ${fsNom}px Arial`;
+      ctx.font = `900 ${Math.round(fsNom*1.1)}px Arial`;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('•', bulletX, midY);
+      ctx.fillText('•', ox + pad, midY);
 
-      // Nombre — truncar si no entra
+      // Nombre — reservar espacio para precio
       ctx.fillStyle = '#FFFFFF';
       ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
+      const precTxt = p.precio > 0 ? '$ '+p.precio.toLocaleString('es-AR') : '';
+      let precW2 = 0;
+      if (precTxt) {
+        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
+        precW2 = ctx.measureText(precTxt).width + pad;
+        ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
+      }
+      const maxNomW = CW - pad*3 - Math.round(fsNom*1.1*0.7) - precW2;
       let nom = p.nombre;
-      // Reservar espacio para precio si existe
-      const espacioNom = p.precio > 0 ? maxNomW * 0.60 : maxNomW;
-      while (ctx.measureText(nom).width > espacioNom && nom.length > 3)
+      while (ctx.measureText(nom).width > maxNomW && nom.length > 3)
         nom = nom.slice(0,-2) + '…';
-      ctx.fillText(nom, nomX, midY);
+      ctx.textAlign = 'left';
+      ctx.fillText(nom, ox + pad + Math.round(fsNom*0.8), midY);
 
-      // Precio tachado (alineado derecha de zona izquierda)
+      // Precio tachado
       if (p.precio > 0) {
-        const precTxt = '$ ' + p.precio.toLocaleString('es-AR');
-        ctx.font = `400 ${fsPrc}px 'Oswald', sans-serif`;
         ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
         ctx.textAlign = 'right';
-        const precRX = ox + zonaIzqW - pad;
+        const precRX = ox + CW - pad;
         ctx.fillText(precTxt, precRX, midY);
-        // Línea de tachado
         const tw = ctx.measureText(precTxt).width;
-        ctx.strokeStyle = 'rgba(255,80,80,0.85)';
-        ctx.lineWidth = Math.max(2, Math.round(fsPrc * 0.07));
+        ctx.strokeStyle = 'rgba(255,80,80,0.9)';
+        ctx.lineWidth = Math.max(2, Math.round(fsPrec*0.08));
         ctx.beginPath();
-        ctx.moveTo(precRX - tw, midY - fsPrc * 0.05);
-        ctx.lineTo(precRX,      midY - fsPrc * 0.05);
+        ctx.moveTo(precRX - tw, midY - fsPrec*0.05);
+        ctx.lineTo(precRX,      midY - fsPrec*0.05);
         ctx.stroke();
       }
     });
 
-    // ── FRANJA AHORRO ─────────────────────────────────────────
-    const ahY = oy + CH - ahoH - vigH;
-    ctx.fillStyle = '#FFE000';
-    ctx.fillRect(ox, ahY, zonaIzqW, ahoH);
-    ctx.fillStyle = c.header;
-    ctx.font = `700 ${fsAho}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    let ahoTxt = 'Ahorrás $ ' + (ahorro > 0 ? ahorro.toLocaleString('es-AR') : '—');
-    while (ctx.measureText(ahoTxt).width > zonaIzqW - pad*2 && ahoTxt.length > 3)
-      ahoTxt = ahoTxt.slice(0,-2) + '…';
-    ctx.fillText(ahoTxt, ox + zonaIzqW/2, ahY + ahoH/2);
-
     // ── VIGENCIA ──────────────────────────────────────────────
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.font = `400 ${fsVig}px 'Oswald', sans-serif`;
+    const vigY = oy + CH - precH - vigH;
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = `400 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Válido hasta ' + vigencia, ox + zonaIzqW/2, ahY + ahoH + vigH/2);
+    ctx.fillText('Válido hasta ' + vigencia, ox + CW/2, vigY + vigH/2);
 
-    // ── PANEL PRECIO — contenido ──────────────────────────────
-    // Label
+    // ── ZONA PRECIO INFERIOR ──────────────────────────────────
+    const precZonaY = oy + CH - precH;
+    const mitad = Math.round(CW * 0.45); // ahorro ocupa 45%, precio 55%
+
+    // Columna AHORRÁS (izquierda, amarilla)
+    ctx.fillStyle = '#FFE000';
+    ctx.fillRect(ox, precZonaY, mitad, precH);
     ctx.fillStyle = c.header;
-    ctx.font = `700 ${Math.round(CH*0.07)}px 'Oswald', sans-serif`;
+    ctx.font = `700 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillText('COMBO', pX + precW/2, oy + Math.round(CH*0.03));
-
-    // Precio anterior tachado
-    const fsPAnt = Math.round(CH * 0.075);
-    const antTxt = '$ ' + sepTotal.toLocaleString('es-AR');
-    ctx.font = `400 ${fsPAnt}px 'Oswald', sans-serif`;
-    ctx.fillStyle = '#888888';
-    const antY = oy + Math.round(CH * 0.16);
     ctx.textBaseline = 'middle';
-    ctx.fillText(antTxt, pX + precW/2, antY);
+    ctx.fillText('AHORRÁS', ox + mitad/2, precZonaY + precH*0.35);
+    ctx.font = `700 ${Math.round(CH*0.085)}px 'Oswald', sans-serif`;
+    ctx.fillText('$ '+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + mitad/2, precZonaY + precH*0.72);
+
+    // Columna PRECIO (derecha, color fondo)
+    // Precio anterior tachado
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = `400 ${Math.round(CH*0.06)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const antTxt = '$ '+sepTotal.toLocaleString('es-AR');
+    const precColX = ox + mitad + (CW - mitad)/2;
+    ctx.fillText(antTxt, precColX, precZonaY + precH*0.22);
+    // Tachado
     const antW = ctx.measureText(antTxt).width;
-    ctx.strokeStyle = '#CC4444';
-    ctx.lineWidth = Math.max(3, Math.round(fsPAnt * 0.08));
+    ctx.strokeStyle = 'rgba(255,80,80,0.8)';
+    ctx.lineWidth = Math.max(3, Math.round(CH*0.008));
     ctx.beginPath();
-    ctx.moveTo(pX + precW/2 - antW/2, antY);
-    ctx.lineTo(pX + precW/2 + antW/2, antY);
+    ctx.moveTo(precColX - antW/2, precZonaY + precH*0.22);
+    ctx.lineTo(precColX + antW/2, precZonaY + precH*0.22);
     ctx.stroke();
 
-    // Precio combo — máximo que entre en el ancho del panel
-    let fsCombo = Math.round(CH * 0.28);
-    let fsSig   = Math.round(fsCombo * 0.38);
-    ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`;
+    // Precio nuevo
+    ctx.font = `900 ${fsNum}px 'Bebas Neue', sans-serif`;
     let wNum = ctx.measureText(precStr).width;
     ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
     let wSig = ctx.measureText('$').width;
-    const wEsp = Math.round(precW * 0.04);
-    while ((wSig + wEsp + wNum) > precW - pad && fsCombo > 20) {
-      fsCombo -= 4; fsSig = Math.round(fsCombo * 0.38);
-      ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
-      ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;   wSig = ctx.measureText('$').width;
+    const wEsp = Math.round(CW*0.01);
+    const maxPW = (CW-mitad) - pad*2;
+    let fsN = fsNum, fsS = fsSig;
+    while ((wSig+wEsp+wNum) > maxPW && fsN > 20) {
+      fsN -= 4; fsS = Math.round(fsN*0.38);
+      ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
+      ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`; wSig = ctx.measureText('$').width;
     }
-    const totalW  = wSig + wEsp + wNum;
-    const startX  = pX + (precW - totalW) / 2;
-    // Centrar verticalmente entre antY y ahoH del panel
-    const priceMidY = oy + Math.round(CH * 0.25) + (CH - Math.round(CH*0.25) - ahoH) / 2;
-    ctx.fillStyle = c.header;
+    const totalW = wSig + wEsp + wNum;
+    const startX = precColX - totalW/2;
+    const numY   = precZonaY + precH*0.72;
+    ctx.fillStyle = '#FFE000';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
-    ctx.fillText('$', startX, priceMidY);
-    ctx.font = `900 ${fsCombo}px 'Bebas Neue', sans-serif`;
-    ctx.fillText(precStr, startX + wSig + wEsp, priceMidY);
-
-    // Franja ahorro panel
-    ctx.fillStyle = c.header;
-    ctx.fillRect(pX, oy + CH - ahoH, precW, ahoH);
-    ctx.fillStyle = '#FFE000';
-    ctx.font = `700 ${Math.round(CH*0.065)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    let panelAhoTxt = '$ ' + (ahorro > 0 ? ahorro.toLocaleString('es-AR') : '—');
-    while (ctx.measureText(panelAhoTxt).width > precW - pad && panelAhoTxt.length > 3)
-      panelAhoTxt = panelAhoTxt.slice(0,-2) + '…';
-    ctx.fillText(panelAhoTxt, pX + precW/2, oy + CH - ahoH/2);
+    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
+    ctx.fillText('$', startX, numY);
+    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
+    ctx.fillText(precStr, startX + wSig + wEsp, numY);
   });
 
   // ── LÍNEAS DE CORTE ───────────────────────────────────────
   ctx.save();
-  ctx.setLineDash([24, 24]);
+  ctx.setLineDash([24,24]);
   ctx.strokeStyle = 'rgba(140,140,140,0.45)';
   ctx.lineWidth = 5;
   ctx.beginPath();
-  ctx.moveTo(0, CH);       ctx.lineTo(CW*2, CH);
-  ctx.moveTo(CW, 0);       ctx.lineTo(CW,   CH*2);
+  ctx.moveTo(0, CH);   ctx.lineTo(CW*2, CH);
+  ctx.moveTo(CW, 0);   ctx.lineTo(CW,   CH*2);
   ctx.stroke();
   ctx.restore();
 
@@ -1928,7 +1911,6 @@ function generarPNGCombo() {
     toast('✓ Imagen descargada — imprimí al 100%');
   }, 'image/png');
 }
-
 // ── Info sistema ──────────────────────────────────────────────
 function cargarInfo() {
   document.getElementById('sync-date').textContent = '...';
