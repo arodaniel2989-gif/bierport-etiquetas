@@ -310,10 +310,10 @@
             <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
             <input type="text" id="input-busqueda" placeholder="Nombre del producto..." oninput="onBuscar(this.value)" />
           </div>
-          <button class="btn-scan" id="btn-scan" onclick="toggleScan()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg>
-            Modo escaneo
-          </button>
+          <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);font-size:11px;color:var(--muted);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg>
+            Escaneo activo — apuntá la pistola al producto
+          </div>
           <select class="filtro" id="filtro-seccion" onchange="onBuscar(document.getElementById('input-busqueda').value)">
             <option value="">Todas las secciones</option>
           </select>
@@ -637,7 +637,7 @@ const HOY        = new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'
 // ── Estado ────────────────────────────────────────────────────
 let lista         = [];       // [{nombre, seccion, precio, copias}]
 let moduloActual  = 'gondola';
-let scanActivo    = false;
+let scanActivo    = true;  // siempre activo
 let scanBuffer    = '';
 let scanTimer     = null;
 let colorOferta   = 'rojo';
@@ -749,48 +749,93 @@ function onBuscar(valor) {
     return;
   }
   document.getElementById('resultados').innerHTML = '<div class="res-empty"><div class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--text);margin:0 auto"></div></div>';
-  busquedaTimer = setTimeout(() => ejecutarBusqueda(valor), 350);
+  busquedaTimer = setTimeout(() => ejecutarBusqueda(valor), 300);
+}
+
+function expandirBusqueda(valor) {
+  // Si es solo dígitos → buscar por código de barras
+  if (/^\d+$/.test(valor.trim())) return { tipo: 'barcode', valor: valor.trim() };
+
+  // Si son solo mayúsculas o iniciales (ej: "CC", "PL", "RC")
+  // y no contiene espacios → expandir como iniciales de palabras
+  const sinEspacios = valor.trim();
+  if (/^[A-ZÁÉÍÓÚÑa-záéíóúñ]{2,5}$/.test(sinEspacios) && sinEspacios === sinEspacios.toUpperCase() && sinEspacios.length <= 4) {
+    // Convertir iniciales en patrón: "CC" → buscar palabras que empiecen con C y C
+    return { tipo: 'iniciales', valor: sinEspacios };
+  }
+
+  return { tipo: 'nombre', valor: valor.trim() };
 }
 
 function ejecutarBusqueda(valor) {
-  const sec = document.getElementById('filtro-seccion').value;
-  const url = `${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(valor)}&seccion=${encodeURIComponent(sec)}`;
+  const sec    = document.getElementById('filtro-seccion').value;
+  const parsed = expandirBusqueda(valor);
+
+  // Si es código de barras — buscar directamente
+  if (parsed.tipo === 'barcode') {
+    fetch(`${SCRIPT_URL}?accion=buscarPorCodigo&codigo=${encodeURIComponent(parsed.valor)}`)
+      .then(r => r.json())
+      .then(data => {
+        const cont = document.getElementById('resultados');
+        if (data.encontrado) {
+          cont.innerHTML = `<div class="res-item" onclick='agregarProducto(${JSON.stringify(data).replace(/'/g,"&#39;")})'>
+            <div class="ri-info">
+              <div class="res-nombre">${data.nombre}</div>
+              <div class="res-seccion">${data.seccion}</div>
+            </div>
+            <div class="res-precio">$\u00a0${data.precioConIVA.toLocaleString('es-AR')}</div>
+            <div class="res-add">+</div>
+          </div>`;
+        } else {
+          cont.innerHTML = '<div class="res-empty">Código no encontrado</div>';
+        }
+      })
+      .catch(() => document.getElementById('resultados').innerHTML = '<div class="res-empty">Error de conexión</div>');
+    return;
+  }
+
+  // Búsqueda por nombre (incluyendo iniciales)
+  const url = `${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(parsed.valor)}&seccion=${encodeURIComponent(sec)}`;
   fetch(url)
     .then(r => r.json())
     .then(data => {
       const cont = document.getElementById('resultados');
-      if (!data.resultados || data.resultados.length === 0) {
-        cont.innerHTML = '<div class="res-empty">Sin resultados para "' + valor + '"</div>';
-        return;
+      let resultados = data.resultados || [];
+
+      // Si son iniciales y no hay resultados, intentar con la primera inicial como texto
+      if (parsed.tipo === 'iniciales' && resultados.length === 0) {
+        // Fallback: buscar la secuencia como texto normal
+        return fetch(`${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(parsed.valor.toLowerCase())}&seccion=${encodeURIComponent(sec)}`)
+          .then(r => r.json())
+          .then(d => mostrarResultados(cont, d.resultados || [], valor));
       }
-      cont.innerHTML = data.resultados.map(p => `
-        <div class="res-item" onclick='agregarProducto(${JSON.stringify(p)})'>
-          <div class="ri-info">
-            <div class="res-nombre">${p.nombre}</div>
-            <div class="res-seccion">${p.seccion}</div>
-          </div>
-          <div class="res-precio">$\u00a0${p.precioConIVA.toLocaleString('es-AR')}</div>
-          <div class="res-add">+</div>
-        </div>`).join('');
+
+      mostrarResultados(cont, resultados, valor);
     })
     .catch(() => {
       document.getElementById('resultados').innerHTML = '<div class="res-empty">Error de conexión</div>';
     });
 }
 
-// ── Escaneo ───────────────────────────────────────────────────
-function toggleScan() {
-  scanActivo = !scanActivo;
-  const btn = document.getElementById('btn-scan');
-  if (scanActivo) {
-    btn.classList.add('scan-active');
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg> Escaneando...`;
-    toast('Modo escaneo activo — apuntá la pistola al producto');
-  } else {
-    btn.classList.remove('scan-active');
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4M3 5h4M21 5h-4M21 5v4M3 19v-4M3 19h4M21 19h-4M21 19v-4M7 9h10v6H7z"/></svg> Modo escaneo`;
+function mostrarResultados(cont, resultados, busqueda) {
+  if (!resultados.length) {
+    cont.innerHTML = `<div class="res-empty">Sin resultados para "${busqueda}"</div>`;
+    return;
   }
+  cont.innerHTML = resultados.map(p => `
+    <div class="res-item" onclick='agregarProducto(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+      <div class="ri-info">
+        <div class="res-nombre">${p.nombre}</div>
+        <div class="res-seccion">${p.seccion}</div>
+      </div>
+      <div class="res-precio">$\u00a0${(p.precioConIVA||0).toLocaleString('es-AR')}</div>
+      <div class="res-add">+</div>
+    </div>`).join('');
 }
+
+// ── Escaneo ───────────────────────────────────────────────────
+// Escaneo siempre activo — no requiere botón
+function toggleScan() { /* deprecated — escaneo siempre activo */ }
 
 document.addEventListener('keydown', e => {
   if (!scanActivo) return;
@@ -1785,13 +1830,16 @@ function guardarComboDB() {
     ? JSON.stringify({ accion, id: comboActualId, combo })
     : JSON.stringify({ accion, combo });
 
+  // Apps Script requiere fetch con redirect:'follow' para manejar CORS correctamente
   fetch(SCRIPT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' }, // text/plain evita preflight CORS
     body: payload,
+    redirect: 'follow',
   })
-    .then(r => r.json())
-    .then(data => {
+    .then(r => r.text())
+    .then(txt => {
+      const data = JSON.parse(txt);
       if (data.ok) {
         if (!comboActualId && data.id) comboActualId = data.id;
         comboModificado = false;
@@ -1802,7 +1850,10 @@ function guardarComboDB() {
         toast('Error: ' + (data.error || 'desconocido'), true);
       }
     })
-    .catch(() => toast('Error de conexión', true))
+    .catch(err => {
+      console.error('Error guardando combo:', err);
+      toast('Error de conexión al guardar', true);
+    })
     .finally(() => {
       if (btn) {
         btn.disabled = false;
@@ -1816,11 +1867,13 @@ function eliminarComboGuardado(id) {
   if (!confirm('¿Eliminar este combo?')) return;
   fetch(SCRIPT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain' },
     body: JSON.stringify({ accion: 'eliminarCombo', id }),
+    redirect: 'follow',
   })
-    .then(r => r.json())
-    .then(data => {
+    .then(r => r.text())
+    .then(txt => {
+      const data = JSON.parse(txt);
       if (data.ok) {
         toast('Combo eliminado');
         if (comboActualId === id) nuevoCombo();
@@ -1828,7 +1881,8 @@ function eliminarComboGuardado(id) {
       } else {
         toast('Error al eliminar', true);
       }
-    });
+    })
+    .catch(() => toast('Error de conexión', true));
 }
 
 // ── Combo — imprimir ─────────────────────────────────────────
@@ -1878,6 +1932,205 @@ function setColorCombo(color, el) {
 // El escaneo global redirige al buscador de combo cuando el módulo está activo
 // (ya manejado por el listener de keydown global)
 
+
+
+function generarPNGCombo() {
+  const DPI   = 300;
+  const MM2PX = DPI / 25.4;
+  const CW = Math.round(148.5 * MM2PX);
+  const CH = Math.round(105   * MM2PX);
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = CW * 2;
+  canvas.height = CH * 2;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cabH   = Math.round(CH * 44/210);
+  const fsCab  = Math.round(CH * 25/210);
+  const fsNom  = Math.round(CH * 14/210);
+  const fsPrec = Math.round(CH * 11/210);
+  const fsNum  = Math.round(CH * 60/210);
+  const fsSig  = Math.round(fsNum * 0.38);
+  const precH  = Math.round(CH * 63/210);
+  const pad    = Math.round(CW * 0.025);
+
+  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
+
+  posiciones.forEach(([ox, oy], idx) => {
+    const d = combosData[idx];
+    const prods = (d.prods || []).filter(p => p.nombre && p.nombre.trim());
+    const tieneContenido = prods.length > 0 && d.precio > 0;
+
+    if (!tieneContenido) {
+      ctx.save();
+      ctx.setLineDash([16,16]);
+      ctx.strokeStyle = '#DDDDDD';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(ox+4, oy+4, CW-4, CH-4);
+      ctx.restore();
+      return;
+    }
+
+    const c        = COLORES[d.color] || COLORES.azul;
+    const sepTotal = (d.prods || []).reduce((s,p) => s+(parseFloat(p.precio)||0), 0);
+    const ahorro   = sepTotal - (parseFloat(d.precio)||0);
+    const precStr  = (parseFloat(d.precio)||0).toLocaleString('es-AR');
+    const vigencia = d.vigencia
+      ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
+      : '—';
+
+    // Fondo
+    ctx.fillStyle = c.fondo;
+    ctx.fillRect(ox, oy, CW, CH);
+
+    // Cabecera
+    ctx.fillStyle = c.header;
+    ctx.fillRect(ox, oy, CW, cabH);
+    ctx.fillStyle = '#FFE000';
+    ctx.font = `900 ${fsCab}px 'Bebas Neue', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(d.cabecera || 'COMBO', ox + CW/2, oy + cabH/2);
+
+    // Zona productos
+    const vigH    = Math.round(CH * 0.075);
+    const prodTop = oy + cabH;
+    const prodBot = oy + CH - precH - vigH;
+    const prodH   = prodBot - prodTop;
+    const nProds  = prods.length;
+    const lineH   = Math.floor(prodH / Math.max(nProds, 1));
+
+    prods.forEach((p, i) => {
+      const midY = prodTop + i * lineH + lineH/2;
+
+      // Bullet
+      ctx.fillStyle = '#FFE000';
+      ctx.font = `900 ${Math.round(fsNom*1.1)}px Arial`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('•', ox + pad, midY);
+
+      // Nombre
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
+      const precTxt = p.precio > 0 ? '$ '+parseFloat(p.precio).toLocaleString('es-AR') : '';
+      let precW2 = 0;
+      if (precTxt) {
+        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
+        precW2 = ctx.measureText(precTxt).width + pad;
+        ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
+      }
+      const maxNomW = CW - pad*3 - Math.round(fsNom*0.8) - precW2;
+      let nom = p.nombre;
+      while (ctx.measureText(nom).width > maxNomW && nom.length > 3) nom = nom.slice(0,-2)+'…';
+      ctx.textAlign = 'left';
+      ctx.fillText(nom, ox + pad + Math.round(fsNom*0.8), midY);
+
+      // Precio tachado
+      if (p.precio > 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
+        ctx.textAlign = 'right';
+        const precRX = ox + CW - pad;
+        ctx.fillText(precTxt, precRX, midY);
+        const tw = ctx.measureText(precTxt).width;
+        ctx.strokeStyle = 'rgba(255,80,80,0.9)';
+        ctx.lineWidth = Math.max(2, Math.round(fsPrec*0.08));
+        ctx.beginPath();
+        ctx.moveTo(precRX - tw, midY - fsPrec*0.05);
+        ctx.lineTo(precRX,      midY - fsPrec*0.05);
+        ctx.stroke();
+      }
+    });
+
+    // Vigencia
+    const vigY = oy + CH - precH - vigH;
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = `400 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Válido hasta ' + vigencia, ox + CW/2, vigY + vigH/2);
+
+    // Zona precio inferior
+    const precZonaY = oy + CH - precH;
+    const mitad = Math.round(CW * 0.45);
+
+    // AHORRÁS (izquierda, amarillo)
+    ctx.fillStyle = '#FFE000';
+    ctx.fillRect(ox, precZonaY, mitad, precH);
+    ctx.fillStyle = c.header;
+    ctx.font = `700 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('AHORRÁS', ox + mitad/2, precZonaY + precH*0.32);
+    ctx.font = `700 ${Math.round(CH*0.085)}px 'Oswald', sans-serif`;
+    ctx.fillText('$ '+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + mitad/2, precZonaY + precH*0.72);
+
+    // Precio anterior tachado (derecha)
+    const precColX = ox + mitad + (CW - mitad)/2;
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = `400 ${Math.round(CH*0.06)}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const antTxt = '$ '+sepTotal.toLocaleString('es-AR');
+    ctx.fillText(antTxt, precColX, precZonaY + precH*0.22);
+    const antW = ctx.measureText(antTxt).width;
+    ctx.strokeStyle = 'rgba(255,80,80,0.8)';
+    ctx.lineWidth = Math.max(3, Math.round(CH*0.008));
+    ctx.beginPath();
+    ctx.moveTo(precColX - antW/2, precZonaY + precH*0.22);
+    ctx.lineTo(precColX + antW/2, precZonaY + precH*0.22);
+    ctx.stroke();
+
+    // Precio combo
+    let fsN = fsNum, fsS = fsSig;
+    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
+    let wNum = ctx.measureText(precStr).width;
+    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
+    let wSig = ctx.measureText('$').width;
+    const wEsp = Math.round(CW*0.01);
+    const maxPW = (CW - mitad) - pad*2;
+    while ((wSig+wEsp+wNum) > maxPW && fsN > 20) {
+      fsN -= 4; fsS = Math.round(fsN*0.38);
+      ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
+      ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`; wSig = ctx.measureText('$').width;
+    }
+    const totalW  = wSig + wEsp + wNum;
+    const startX  = precColX - totalW/2;
+    const priceMidY = precZonaY + precH*0.65;
+    ctx.fillStyle = '#FFE000';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
+    ctx.fillText('$', startX, priceMidY);
+    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
+    ctx.fillText(precStr, startX + wSig + wEsp, priceMidY);
+  });
+
+  // Líneas de corte
+  ctx.save();
+  ctx.setLineDash([24,24]);
+  ctx.strokeStyle = 'rgba(140,140,140,0.45)';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(0, CH);  ctx.lineTo(CW*2, CH);
+  ctx.moveTo(CW, 0);  ctx.lineTo(CW, CH*2);
+  ctx.stroke();
+  ctx.restore();
+
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'combos_' + new Date().toISOString().slice(0,10) + '.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✓ Imagen descargada — imprimí al 100%');
+  }, 'image/png');
+}
 
 // ── Info sistema ──────────────────────────────────────────────
 function cargarInfo() {
