@@ -483,91 +483,103 @@
 
   <!-- MÓDULO COMBO -->
   <div class="modulo" id="mod-combo">
-    <div class="combo-layout">
-      <div class="combo-form" style="width:100%;display:flex;flex-direction:column;gap:12px;overflow-y:auto;">
+    <div style="display:flex;flex:1;overflow:hidden;">
 
-        <!-- Tabs de los 4 combos -->
-        <div style="display:flex;gap:4px;flex-shrink:0;">
-          <button class="combo-tab active" onclick="setComboTab(0,this)">Combo 1</button>
-          <button class="combo-tab" onclick="setComboTab(1,this)">Combo 2</button>
-          <button class="combo-tab" onclick="setComboTab(2,this)">Combo 3</button>
-          <button class="combo-tab" onclick="setComboTab(3,this)">Combo 4</button>
+      <!-- Panel izquierdo: lista de combos guardados -->
+      <div style="width:260px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+        <div class="col-header">
+          Combos guardados
+          <button class="btn-scan" style="padding:4px 8px;font-size:11px;width:auto;" onclick="nuevoCombo()">+ Nuevo</button>
         </div>
-
-        <!-- Formulario dinámico del combo activo -->
-        <div style="display:flex;gap:12px;flex:1;min-height:0;overflow-y:auto;">
-          <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:260px;">
-
-            <div class="form-card">
-              <div class="form-title">Datos del combo</div>
-              <div class="form-group">
-                <label class="form-label">Cabecera</label>
-                <select class="form-input" id="co-cabecera" onchange="guardarComboActivo();actualizarCombo()">
-                  <option>COMBO</option>
-                  <option>LLEVÁ LOS DOS</option>
-                  <option>PACK AHORRO</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Color</label>
-                <div class="color-opts" id="co-color-opts">
-                  <div class="color-opt selected" style="background:#1a56a0" onclick="setColorCombo('azul',this)" title="Azul"></div>
-                  <div class="color-opt" style="background:#CC0000" onclick="setColorCombo('rojo',this)" title="Rojo"></div>
-                  <div class="color-opt" style="background:#1a7a3c" onclick="setColorCombo('verde',this)" title="Verde"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-card">
-              <div class="form-title">Productos incluidos</div>
-              <div id="combo-prods">
-                <div class="prod-row"><span class="prod-num">1</span><input type="text" placeholder="Nombre del producto" oninput="guardarComboActivo();actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="guardarComboActivo();actualizarCombo()"></div>
-                <div class="prod-row"><span class="prod-num">2</span><input type="text" placeholder="Nombre del producto" oninput="guardarComboActivo();actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="guardarComboActivo();actualizarCombo()"></div>
-                <div class="prod-row"><span class="prod-num">3</span><input type="text" placeholder="Nombre del producto" oninput="guardarComboActivo();actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="guardarComboActivo();actualizarCombo()"></div>
-                <div class="prod-row"><span class="prod-num">4</span><input type="text" placeholder="Nombre del producto" oninput="guardarComboActivo();actualizarCombo()"><input type="number" class="precio-input" placeholder="$ precio" oninput="guardarComboActivo();actualizarCombo()"></div>
-              </div>
-            </div>
-
-            <div class="form-card">
-              <div class="form-title">Precio</div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Precio combo ($)</label>
-                  <input type="number" class="form-input" id="co-precio" placeholder="5500" oninput="guardarComboActivo();actualizarCombo()">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Válido hasta</label>
-                  <input type="date" class="form-input" id="co-vigencia" onchange="guardarComboActivo();actualizarCombo()">
-                </div>
-              </div>
-              <div class="info-row" style="padding:4px 0 0">
-                <span>Precio por separado</span>
-                <span id="co-sep">—</span>
-              </div>
-              <div class="info-row">
-                <span>Ahorrás</span>
-                <span id="co-ahorro" style="font-weight:700;color:var(--success)">—</span>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Vista previa hoja completa -->
-          <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
-            <div class="form-card" style="flex:1;display:flex;flex-direction:column;">
-              <div class="form-title">Vista previa — hoja completa</div>
-              <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);border-radius:var(--radius);overflow:hidden;">
-                <div id="combo-preview-wrap"></div>
-              </div>
-            </div>
-          </div>
+        <div style="flex:1;overflow-y:auto;" id="combo-lista-guardados">
+          <div class="res-empty">Cargando combos...</div>
         </div>
-
-        <button class="btn-primary" onclick="imprimirCombo()" style="flex-shrink:0;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Generar PDF — 4 combos
-        </button>
       </div>
+
+      <!-- Panel central: formulario -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);">
+        <div class="col-header" id="combo-form-titulo">Nuevo combo</div>
+        <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;">
+
+          <!-- Nombre del combo -->
+          <div class="form-card">
+            <div class="form-title">Nombre del combo</div>
+            <input type="text" class="form-input" id="co-nombre-combo" placeholder="Ej: Pack Finde, Combo Picada..." oninput="marcarModificado()">
+          </div>
+
+          <!-- Buscador de productos -->
+          <div class="form-card">
+            <div class="form-title">Agregar productos</div>
+            <div class="input-wrap" style="margin-bottom:6px">
+              <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" id="co-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto o escanear..." oninput="buscarProductoCombo(this.value)">
+            </div>
+            <div id="co-resultados" style="display:none;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:6px;max-height:160px;overflow-y:auto;"></div>
+            <!-- Lista de productos del combo -->
+            <div id="co-productos-lista" style="display:flex;flex-direction:column;gap:4px;"></div>
+            <div id="co-max-aviso" style="display:none;font-size:11px;color:var(--muted);margin-top:4px;">Máximo 4 productos por combo</div>
+          </div>
+
+          <!-- Precio y diseño -->
+          <div class="form-card">
+            <div class="form-title">Precio y diseño</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Precio combo ($)</label>
+                <input type="number" class="form-input" id="co-precio" placeholder="5500" oninput="actualizarResumenCombo();marcarModificado()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Válido hasta</label>
+                <input type="date" class="form-input" id="co-vigencia" onchange="marcarModificado()">
+              </div>
+            </div>
+            <div class="info-row" style="padding:4px 0 0"><span>Precio por separado</span><span id="co-sep">—</span></div>
+            <div class="info-row"><span>Ahorrás</span><span id="co-ahorro" style="font-weight:700;color:var(--success)">—</span></div>
+          </div>
+
+          <div class="form-card">
+            <div class="form-title">Diseño del cartel</div>
+            <div class="form-group">
+              <label class="form-label">Cabecera</label>
+              <select class="form-input" id="co-cabecera" onchange="actualizarCombo();marcarModificado()">
+                <option>COMBO</option>
+                <option>LLEVÁ LOS DOS</option>
+                <option>PACK AHORRO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color</label>
+              <div class="color-opts" id="co-color-opts">
+                <div class="color-opt selected" style="background:#1a56a0" onclick="setColorCombo('azul',this)" title="Azul"></div>
+                <div class="color-opt" style="background:#CC0000" onclick="setColorCombo('rojo',this)" title="Rojo"></div>
+                <div class="color-opt" style="background:#1a7a3c" onclick="setColorCombo('verde',this)" title="Verde"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div style="display:flex;gap:8px;">
+            <button class="btn-primary" style="flex:1;" onclick="guardarComboDB()" id="btn-guardar-combo">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Guardar combo
+            </button>
+            <button class="btn-primary" style="flex:1;" onclick="imprimirComboActual()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Imprimir
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Panel derecho: vista previa -->
+      <div style="width:280px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="col-header">Vista previa</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);overflow:hidden;">
+          <div id="combo-preview-wrap"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -618,7 +630,7 @@
 
 <script>
 // ── Config ────────────────────────────────────────────────────
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqgEYZo3h7D0pl2fj7oHNt7OTfh6brK2Mb8jG57NJlJUQoHy-TkklJhUGGQPzYQvFj/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDAZcXSz_EydzrbiPgjaQPXuF2FP37fbOepYmCosELNWzKRXurrA6lXFt68FSNPLSbyw/exec';
 const POR_HOJA   = 24;
 const HOY        = new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'numeric'});
 
@@ -802,7 +814,12 @@ function buscarPorCodigo(codigo) {
     .then(r => r.json())
     .then(data => {
       if (data.encontrado) {
-        agregarProducto(data);
+        // Redirigir según módulo activo
+        if (moduloActual === 'combo') {
+          agregarProductoCombo(data);
+        } else {
+          agregarProducto(data);
+        }
         toast('✓ ' + data.nombre);
       } else {
         toast('Producto no encontrado: ' + codigo, true);
@@ -1565,352 +1582,303 @@ function generarPDFCombo() {
 }
 
 
-// ── Combo — gestión de tabs ───────────────────────────────────
-function setComboTab(idx, btn) {
-  guardarComboActivo();
-  comboTabActivo = idx;
-  document.querySelectorAll('.combo-tab').forEach((b,i) => b.classList.toggle('active', i===idx));
-  cargarComboActivo();
+// ── Combo — estado ───────────────────────────────────────────
+let combosGuardados    = [];  // combos del Sheet
+let comboActualId      = null; // ID del combo en edición (null = nuevo)
+let comboModificado    = false;
+let comboProductos     = [];  // [{nombre, precio}] del combo en edición
+let busquedaComboTimer = null;
+
+function marcarModificado() {
+  comboModificado = true;
+  const btn = document.getElementById('btn-guardar-combo');
+  if (btn) btn.style.background = 'var(--danger)';
+}
+
+// ── Combo — lista guardados ───────────────────────────────────
+function cargarCombosGuardados() {
+  const cont = document.getElementById('combo-lista-guardados');
+  if (!cont) return;
+  cont.innerHTML = '<div class="res-empty"><div class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--text);margin:0 auto"></div></div>';
+  fetch(`${SCRIPT_URL}?accion=getCombos`)
+    .then(r => r.json())
+    .then(data => {
+      combosGuardados = data.combos || [];
+      renderListaCombos();
+    })
+    .catch(() => {
+      cont.innerHTML = '<div class="res-empty">Error de conexión</div>';
+    });
+}
+
+function renderListaCombos() {
+  const cont = document.getElementById('combo-lista-guardados');
+  if (!cont) return;
+  if (!combosGuardados.length) {
+    cont.innerHTML = '<div class="res-empty">No hay combos guardados<br><small>Creá uno con el botón "Nuevo"</small></div>';
+    return;
+  }
+  cont.innerHTML = combosGuardados.map(c => {
+    const isActive = c.id === comboActualId;
+    const nProds   = c.productos.filter(p => p.nombre).length;
+    return `<div class="res-item ${isActive?'style="background:var(--bg)"':''}" onclick="cargarComboGuardado('${c.id}')" style="${isActive?'background:var(--bg);border-left:3px solid var(--text);':''}">
+      <div class="ri-info">
+        <div class="ri-nombre">${c.nombre || 'Sin nombre'}</div>
+        <div class="ri-sec">${nProds} producto${nProds!==1?'s':''} · $${(c.precioCombo||0).toLocaleString('es-AR')}</div>
+      </div>
+      <button onclick="event.stopPropagation();eliminarComboGuardado('${c.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 4px;" title="Eliminar">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function nuevoCombo() {
+  if (comboModificado && !confirm('Hay cambios sin guardar. ¿Continuar sin guardar?')) return;
+  comboActualId  = null;
+  comboProductos = [];
+  comboModificado = false;
+  document.getElementById('co-nombre-combo').value = '';
+  document.getElementById('co-precio').value = '';
+  document.getElementById('co-vigencia').value = '';
+  document.getElementById('co-cabecera').value = 'COMBO';
+  colorCombo = 'azul';
+  document.querySelectorAll('#co-color-opts .color-opt').forEach((el,i) => el.classList.toggle('selected', i===0));
+  document.getElementById('combo-form-titulo').textContent = 'Nuevo combo';
+  const btn = document.getElementById('btn-guardar-combo');
+  if (btn) btn.style.background = '';
+  renderProductosCombo();
+  actualizarCombo();
+  renderListaCombos();
+}
+
+function cargarComboGuardado(id) {
+  if (comboModificado && !confirm('Hay cambios sin guardar. ¿Continuar?')) return;
+  const c = combosGuardados.find(x => x.id === id);
+  if (!c) return;
+  comboActualId   = id;
+  comboProductos  = c.productos.map(p => ({nombre: p.nombre, precio: p.precio}));
+  comboModificado = false;
+
+  document.getElementById('co-nombre-combo').value = c.nombre || '';
+  document.getElementById('co-precio').value       = c.precioCombo || '';
+  document.getElementById('co-vigencia').value      = c.vigenciaHasta || '';
+  document.getElementById('co-cabecera').value      = c.cabecera || 'COMBO';
+  document.getElementById('combo-form-titulo').textContent = 'Editando: ' + (c.nombre || 'combo');
+
+  colorCombo = c.color || 'azul';
+  const colorMap = {'azul':'#1a56a0','rojo':'#CC0000','verde':'#1a7a3c'};
+  document.querySelectorAll('#co-color-opts .color-opt').forEach(el => {
+    el.classList.toggle('selected', el.getAttribute('title')?.toLowerCase() === colorCombo);
+  });
+
+  const btn = document.getElementById('btn-guardar-combo');
+  if (btn) btn.style.background = '';
+
+  renderProductosCombo();
+  actualizarCombo();
+  renderListaCombos();
+}
+
+// ── Combo — buscador de productos ─────────────────────────────
+function buscarProductoCombo(valor) {
+  clearTimeout(busquedaComboTimer);
+  const cont = document.getElementById('co-resultados');
+  if (!valor || valor.length < 2) { cont.style.display = 'none'; return; }
+  busquedaComboTimer = setTimeout(() => {
+    fetch(`${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(valor)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.resultados?.length) { cont.style.display = 'none'; return; }
+        cont.style.display = 'block';
+        cont.innerHTML = data.resultados.slice(0,6).map(p => `
+          <div class="res-item" onclick="agregarProductoCombo(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+            <div class="ri-info">
+              <div class="ri-nombre">${p.nombre}</div>
+              <div class="ri-sec">${p.seccion}</div>
+            </div>
+            <div class="ri-precio">$ ${(p.precioConIVA||0).toLocaleString('es-AR')}</div>
+            <div class="res-add">+</div>
+          </div>`).join('');
+      });
+  }, 300);
+}
+
+function agregarProductoCombo(p) {
+  if (comboProductos.length >= 4) {
+    document.getElementById('co-max-aviso').style.display = 'block';
+    return;
+  }
+  comboProductos.push({ nombre: p.nombre, precio: p.precioConIVA || 0 });
+  document.getElementById('co-busqueda').value = '';
+  document.getElementById('co-resultados').style.display = 'none';
+  document.getElementById('co-max-aviso').style.display = comboProductos.length >= 4 ? 'block' : 'none';
+  marcarModificado();
+  renderProductosCombo();
+  actualizarResumenCombo();
   actualizarCombo();
 }
 
-function guardarComboActivo() {
-  const rows = document.querySelectorAll('#combo-prods .prod-row');
-  const prods = [];
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll('input');
-    prods.push({ nombre: inputs[0].value.trim(), precio: parseFloat(inputs[1].value)||0 });
-  });
-  combosData[comboTabActivo] = {
-    cabecera: document.getElementById('co-cabecera').value,
-    color:    colorCombo,
-    prods,
-    precio:   parseFloat(document.getElementById('co-precio').value)||0,
-    vigencia: document.getElementById('co-vigencia').value,
-  };
+function quitarProductoCombo(idx) {
+  comboProductos.splice(idx, 1);
+  document.getElementById('co-max-aviso').style.display = 'none';
+  marcarModificado();
+  renderProductosCombo();
+  actualizarResumenCombo();
+  actualizarCombo();
 }
 
-function cargarComboActivo() {
-  const d = combosData[comboTabActivo];
-  document.getElementById('co-cabecera').value = d.cabecera;
-  document.getElementById('co-precio').value   = d.precio || '';
-  document.getElementById('co-vigencia').value  = d.vigencia;
-  colorCombo = d.color;
-  const colorMap = {'azul':'#1a56a0','rojo':'#CC0000','verde':'#1a7a3c'};
-  document.querySelectorAll('#co-color-opts .color-opt').forEach(el => {
-    el.classList.toggle('selected', el.getAttribute('title')?.toLowerCase() === d.color);
-  });
-  const rows = document.querySelectorAll('#combo-prods .prod-row');
-  rows.forEach((row, i) => {
-    const inputs = row.querySelectorAll('input');
-    inputs[0].value = d.prods[i]?.nombre || '';
-    inputs[1].value = d.prods[i]?.precio || '';
-  });
+function editarPrecioCombo(idx, val) {
+  comboProductos[idx].precio = parseFloat(val) || 0;
+  marcarModificado();
+  actualizarResumenCombo();
+  actualizarCombo();
+}
+
+function renderProductosCombo() {
+  const cont = document.getElementById('co-productos-lista');
+  if (!cont) return;
+  if (!comboProductos.length) {
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">Buscá productos para agregar al combo</div>';
+    return;
+  }
+  cont.innerHTML = comboProductos.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);">
+      <span style="font-size:11px;color:var(--muted);min-width:12px;">${i+1}</span>
+      <span style="font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
+      <input type="number" value="${p.precio}" style="width:80px;font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);text-align:right;" oninput="editarPrecioCombo(${i},this.value)">
+      <button onclick="quitarProductoCombo(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 2px;">✕</button>
+    </div>`).join('');
+}
+
+function actualizarResumenCombo() {
+  const sep = comboProductos.reduce((s,p) => s+(p.precio||0), 0);
+  const precio = parseFloat(document.getElementById('co-precio')?.value) || 0;
+  const ahorro = sep - precio;
+  const sepEl = document.getElementById('co-sep');
+  const ahoEl = document.getElementById('co-ahorro');
+  if (sepEl) sepEl.textContent = sep > 0 ? '$ '+sep.toLocaleString('es-AR') : '—';
+  if (ahoEl) ahoEl.textContent = ahorro > 0 ? '$ '+ahorro.toLocaleString('es-AR') : '—';
+}
+
+// ── Combo — guardar en Sheet ──────────────────────────────────
+function guardarComboDB() {
+  const nombre = document.getElementById('co-nombre-combo').value.trim();
+  const precio = parseFloat(document.getElementById('co-precio').value) || 0;
+  if (!nombre) { toast('Ingresá un nombre para el combo', true); return; }
+  if (!comboProductos.length) { toast('Agregá al menos un producto', true); return; }
+  if (!precio) { toast('Ingresá el precio del combo', true); return; }
+
+  const btn = document.getElementById('btn-guardar-combo');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Guardando...'; }
+
+  const vigencia = document.getElementById('co-vigencia').value;
+  const combo = {
+    nombre,
+    cabecera:     document.getElementById('co-cabecera').value,
+    color:        colorCombo,
+    productos:    comboProductos,
+    precioCombo:  precio,
+    vigenciaHasta: vigencia,
+  };
+
+  const accion  = comboActualId ? 'actualizarCombo' : 'guardarCombo';
+  const payload = comboActualId
+    ? JSON.stringify({ accion, id: comboActualId, combo })
+    : JSON.stringify({ accion, combo });
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload,
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        if (!comboActualId && data.id) comboActualId = data.id;
+        comboModificado = false;
+        toast('✓ Combo guardado');
+        cargarCombosGuardados();
+        document.getElementById('combo-form-titulo').textContent = 'Editando: ' + nombre;
+      } else {
+        toast('Error: ' + (data.error || 'desconocido'), true);
+      }
+    })
+    .catch(() => toast('Error de conexión', true))
+    .finally(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar combo';
+      }
+    });
+}
+
+function eliminarComboGuardado(id) {
+  if (!confirm('¿Eliminar este combo?')) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accion: 'eliminarCombo', id }),
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        toast('Combo eliminado');
+        if (comboActualId === id) nuevoCombo();
+        cargarCombosGuardados();
+      } else {
+        toast('Error al eliminar', true);
+      }
+    });
+}
+
+// ── Combo — imprimir ─────────────────────────────────────────
+function imprimirComboActual() {
+  if (!comboProductos.length) { toast('El combo no tiene productos', true); return; }
+  const precio = parseFloat(document.getElementById('co-precio').value) || 0;
+  if (!precio) { toast('Ingresá el precio del combo', true); return; }
+  toast('Generando imagen...');
+  // Armar combosData con el combo actual para generarPNGCombo
+  const sep = comboProductos.reduce((s,p) => s+(p.precio||0), 0);
+  const vigencia = document.getElementById('co-vigencia').value;
+  combosData[0] = {
+    cabecera: document.getElementById('co-cabecera').value,
+    color:    colorCombo,
+    prods:    comboProductos.slice(0,4).concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4),
+    precio,
+    vigencia,
+  };
+  // Vaciar las otras 3 posiciones
+  for (let i = 1; i < 4; i++) combosData[i] = { cabecera:'COMBO', color:'azul', prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}], precio:0, vigencia:'' };
+  document.fonts.ready.then(() => generarPNGCombo());
 }
 
 // ── Combo — actualizar vista previa ──────────────────────────
 function actualizarCombo() {
-  const rows = document.querySelectorAll('#combo-prods .prod-row');
-  let sepTotal = 0;
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll('input');
-    sepTotal += parseFloat(inputs[1].value) || 0;
-  });
-  const precioCombo = parseFloat(document.getElementById('co-precio').value) || 0;
-  const ahorro = sepTotal - precioCombo;
-  document.getElementById('co-sep').textContent    = sepTotal > 0 ? '$ ' + sepTotal.toLocaleString('es-AR') : '—';
-  document.getElementById('co-ahorro').textContent  = ahorro  > 0 ? '$ ' + ahorro.toLocaleString('es-AR')  : '—';
-  guardarComboActivo();
-  document.getElementById('combo-preview-wrap').innerHTML = renderHojaComboPreview();
+  actualizarResumenCombo();
+  // Construir combosData[0] con el estado actual para el preview
+  const precio  = parseFloat(document.getElementById('co-precio')?.value) || 0;
+  const vigencia = document.getElementById('co-vigencia')?.value || '';
+  const cabecera = document.getElementById('co-cabecera')?.value || 'COMBO';
+  const prods4   = comboProductos.slice(0,4).concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4);
+  combosData[0] = { cabecera, color: colorCombo, prods: prods4, precio, vigencia };
+  for (let i = 1; i < 4; i++) combosData[i] = { cabecera:'COMBO', color:'azul', prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}], precio:0, vigencia:'' };
+  const wrap = document.getElementById('combo-preview-wrap');
+  if (wrap) wrap.innerHTML = renderHojaComboPreview();
 }
 
-function renderHojaComboPreview() {
-  // Preview a escala reducida — mismo layout que el PNG final
-  // Cartel: 296×210px en mockup → aquí usamos 222×157px (escala 0.75)
-  const CW = 222, CH = 157;
-
-  // Proporciones aprobadas (iguales al PNG)
-  const cabH  = Math.round(CH * 44/210);
-  const vigH  = Math.round(CH * 0.075);
-  const precH = Math.round(CH * 63/210);
-  const fsNom  = Math.round(CH * 14/210);
-  const fsPrec = Math.round(CH * 11/210);
-  const fsNum  = Math.round(CH * 60/210);
-  const fsSig  = Math.round(fsNum * 0.38);
-  const fsCab  = Math.round(CH * 25/210);
-  const mitad  = Math.round(CW * 0.45);
-  const pad    = Math.round(CW * 0.03);
-
-  let html = `<div style="width:${CW*2}px;height:${CH*2}px;background:white;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:0.5px solid #ccc;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.12);">`;
-
-  combosData.forEach((d, idx) => {
-    const prods = d.prods.filter(p => p.nombre.trim());
-    const tieneContenido = prods.length > 0 && d.precio > 0;
-    const isActive = idx === comboTabActivo;
-    const outline  = isActive ? 'outline:2px solid rgba(255,255,255,0.8);outline-offset:-2px;' : '';
-
-    if (!tieneContenido) {
-      html += `<div style="background:white;display:flex;align-items:center;justify-content:center;border:0.5px solid #eee;${outline}">
-        <span style="color:#ccc;font-size:10px;">Combo ${idx+1} vacío</span>
-      </div>`;
-      return;
-    }
-
-    const c      = COLORES[d.color] || COLORES.azul;
-    const sepT   = d.prods.reduce((s,p) => s+(p.precio||0), 0);
-    const aho    = sepT - (d.precio||0);
-    const precStr = d.precio > 0 ? d.precio.toLocaleString('es-AR') : '—';
-    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-    const lineH  = Math.floor((CH - cabH - vigH - precH) / Math.max(prods.length,1));
-    const fsCom  = precStr.length >= 6 ? Math.round(fsNum*0.7) : fsNum;
-
-    html += `<div style="background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:'Oswald',Arial,sans-serif;${outline}">
-      <div style="background:${c.header};height:${cabH}px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <span style="color:#FFE000;font-family:'Bebas Neue',sans-serif;font-size:${fsCab}px;letter-spacing:0.06em;">${d.cabecera}</span>
-      </div>
-      <div style="flex:1;padding:${pad}px ${pad}px 0;display:flex;flex-direction:column;gap:1px;overflow:hidden;">
-        ${prods.map(p => `<div style="display:flex;align-items:baseline;gap:3px;height:${lineH}px;align-items:center;">
-          <span style="color:#FFE000;font-size:${Math.round(fsNom*1.1)}px;font-weight:900;flex-shrink:0;line-height:1;">•</span>
-          <span style="color:white;font-size:${fsNom}px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
-          ${p.precio>0?`<span style="color:rgba(255,255,255,0.4);font-size:${fsPrec}px;text-decoration:line-through;flex-shrink:0;white-space:nowrap;">$${p.precio.toLocaleString('es-AR')}</span>`:''}
-        </div>`).join('')}
-      </div>
-      <div style="text-align:center;color:rgba(255,255,255,0.55);font-size:${Math.round(CH*0.055)}px;padding:1px 0;flex-shrink:0;">Hasta ${vigencia}</div>
-      <div style="height:${precH}px;display:flex;flex-shrink:0;">
-        <div style="width:${mitad}px;background:#FFE000;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <div style="font-size:${Math.round(CH*0.055)}px;font-weight:700;color:${c.header};text-transform:uppercase;letter-spacing:0.04em;">AHORRÁS</div>
-          <div style="font-size:${Math.round(CH*0.085)}px;font-weight:700;color:${c.header};">$${aho>0?aho.toLocaleString('es-AR'):'—'}</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
-          <div style="font-size:${Math.round(CH*0.06)}px;color:rgba(255,255,255,0.4);text-decoration:line-through;">$${sepT>0?sepT.toLocaleString('es-AR'):'—'}</div>
-          <div style="display:flex;align-items:baseline;gap:1px;">
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:${fsSig}px;color:#FFE000;">$</span>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:${fsCom}px;color:#FFE000;line-height:1;letter-spacing:-0.5px;">${precStr}</span>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  });
-
-  html += `<div style="position:absolute;top:50%;left:0;width:100%;height:1px;background:repeating-linear-gradient(90deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;"></div>`;
-  html += `<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:repeating-linear-gradient(180deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);pointer-events:none;"></div>`;
-  html += '</div>';
-  return html;
+function setColorCombo(color, el) {
+  colorCombo = color;
+  document.querySelectorAll('#co-color-opts .color-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  marcarModificado();
+  actualizarCombo();
 }
 
-// ── Combo — imprimir ─────────────────────────────────────────
-function imprimirCombo() {
-  const tieneDatos = combosData.some(d => d.prods.some(p => p.nombre) && d.precio > 0);
-  if (!tieneDatos) { toast('Completá al menos un combo antes de imprimir', true); return; }
-  toast('Generando imagen...');
-  guardarComboActivo();
-  document.fonts.ready.then(() => generarPNGCombo());
-}
+// ── Combo — escaneo con pistola ───────────────────────────────
+// El escaneo global redirige al buscador de combo cuando el módulo está activo
+// (ya manejado por el listener de keydown global)
 
-function generarPNGCombo() {
-  const DPI   = 300;
-  const MM2PX = DPI / 25.4;
-  // A4 apaisada: 297×210mm → 4 combos A6: 148.5×105mm
-  const CW = Math.round(148.5 * MM2PX); // 1754px
-  const CH = Math.round(105   * MM2PX); // 1240px
 
-  const canvas = document.createElement('canvas');
-  canvas.width  = CW * 2;
-  canvas.height = CH * 2;
-  const ctx = canvas.getContext('2d');
-
-  // Fondo blanco
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Valores aprobados — proporcionales al alto del cartel
-  // Mockup: 210px alto → valores en px → factor = val/210
-  const cabH   = Math.round(CH * 44/210);   // cabecera
-  const fsCab  = Math.round(CH * 25/210);   // fuente cabecera
-  const fsNom  = Math.round(CH * 14/210);   // fuente nombre producto
-  const fsPrec = Math.round(CH * 11/210);   // fuente precio tachado
-  const fsNum  = Math.round(CH * 60/210);   // fuente precio combo
-  const fsSig  = Math.round(fsNum * 0.38);  // fuente signo $
-  const precH  = Math.round(CH * 63/210);   // alto zona precio inferior
-  const pad    = Math.round(CW * 0.025);    // padding lateral
-
-  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
-
-  posiciones.forEach(([ox, oy], idx) => {
-    const d = combosData[idx];
-    const prods = d.prods.filter(p => p.nombre.trim());
-    const tieneContenido = prods.length > 0 && d.precio > 0;
-
-    if (!tieneContenido) {
-      ctx.save();
-      ctx.setLineDash([16,16]);
-      ctx.strokeStyle = '#DDDDDD';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(ox+4, oy+4, CW-4, CH-4);
-      ctx.restore();
-      return;
-    }
-
-    const c        = COLORES[d.color] || COLORES.azul;
-    const sepTotal = d.prods.reduce((s,p) => s+(p.precio||0), 0);
-    const ahorro   = sepTotal - d.precio;
-    const precStr  = d.precio.toLocaleString('es-AR');
-    const vigencia = d.vigencia
-      ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
-      : '—';
-
-    // ── FONDO ────────────────────────────────────────────────
-    ctx.fillStyle = c.fondo;
-    ctx.fillRect(ox, oy, CW, CH);
-
-    // ── CABECERA — ancho completo ─────────────────────────────
-    ctx.fillStyle = c.header;
-    ctx.fillRect(ox, oy, CW, cabH);
-    ctx.fillStyle = '#FFE000';
-    ctx.font = `900 ${fsCab}px 'Bebas Neue', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(d.cabecera, ox + CW/2, oy + cabH/2);
-
-    // ── ZONA PRODUCTOS ────────────────────────────────────────
-    const vigH   = Math.round(CH * 0.075);
-    const prodTop = oy + cabH;
-    const prodBot = oy + CH - precH - vigH;
-    const prodH   = prodBot - prodTop;
-    const nProds  = prods.length;
-    const lineH   = Math.floor(prodH / Math.max(nProds, 1));
-
-    prods.forEach((p, i) => {
-      const midY = prodTop + i * lineH + lineH/2;
-
-      // Bullet
-      ctx.fillStyle = '#FFE000';
-      ctx.font = `900 ${Math.round(fsNom*1.1)}px Arial`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('•', ox + pad, midY);
-
-      // Nombre — reservar espacio para precio
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
-      const precTxt = p.precio > 0 ? '$ '+p.precio.toLocaleString('es-AR') : '';
-      let precW2 = 0;
-      if (precTxt) {
-        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
-        precW2 = ctx.measureText(precTxt).width + pad;
-        ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
-      }
-      const maxNomW = CW - pad*3 - Math.round(fsNom*1.1*0.7) - precW2;
-      let nom = p.nombre;
-      while (ctx.measureText(nom).width > maxNomW && nom.length > 3)
-        nom = nom.slice(0,-2) + '…';
-      ctx.textAlign = 'left';
-      ctx.fillText(nom, ox + pad + Math.round(fsNom*0.8), midY);
-
-      // Precio tachado
-      if (p.precio > 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
-        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
-        ctx.textAlign = 'right';
-        const precRX = ox + CW - pad;
-        ctx.fillText(precTxt, precRX, midY);
-        const tw = ctx.measureText(precTxt).width;
-        ctx.strokeStyle = 'rgba(255,80,80,0.9)';
-        ctx.lineWidth = Math.max(2, Math.round(fsPrec*0.08));
-        ctx.beginPath();
-        ctx.moveTo(precRX - tw, midY - fsPrec*0.05);
-        ctx.lineTo(precRX,      midY - fsPrec*0.05);
-        ctx.stroke();
-      }
-    });
-
-    // ── VIGENCIA ──────────────────────────────────────────────
-    const vigY = oy + CH - precH - vigH;
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = `400 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Válido hasta ' + vigencia, ox + CW/2, vigY + vigH/2);
-
-    // ── ZONA PRECIO INFERIOR ──────────────────────────────────
-    const precZonaY = oy + CH - precH;
-    const mitad = Math.round(CW * 0.45); // ahorro ocupa 45%, precio 55%
-
-    // Columna AHORRÁS (izquierda, amarilla)
-    ctx.fillStyle = '#FFE000';
-    ctx.fillRect(ox, precZonaY, mitad, precH);
-    ctx.fillStyle = c.header;
-    ctx.font = `700 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('AHORRÁS', ox + mitad/2, precZonaY + precH*0.35);
-    ctx.font = `700 ${Math.round(CH*0.085)}px 'Oswald', sans-serif`;
-    ctx.fillText('$ '+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + mitad/2, precZonaY + precH*0.72);
-
-    // Columna PRECIO (derecha, color fondo)
-    // Precio anterior tachado
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = `400 ${Math.round(CH*0.06)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const antTxt = '$ '+sepTotal.toLocaleString('es-AR');
-    const precColX = ox + mitad + (CW - mitad)/2;
-    ctx.fillText(antTxt, precColX, precZonaY + precH*0.22);
-    // Tachado
-    const antW = ctx.measureText(antTxt).width;
-    ctx.strokeStyle = 'rgba(255,80,80,0.8)';
-    ctx.lineWidth = Math.max(3, Math.round(CH*0.008));
-    ctx.beginPath();
-    ctx.moveTo(precColX - antW/2, precZonaY + precH*0.22);
-    ctx.lineTo(precColX + antW/2, precZonaY + precH*0.22);
-    ctx.stroke();
-
-    // Precio nuevo
-    ctx.font = `900 ${fsNum}px 'Bebas Neue', sans-serif`;
-    let wNum = ctx.measureText(precStr).width;
-    ctx.font = `900 ${fsSig}px 'Bebas Neue', sans-serif`;
-    let wSig = ctx.measureText('$').width;
-    const wEsp = Math.round(CW*0.01);
-    const maxPW = (CW-mitad) - pad*2;
-    let fsN = fsNum, fsS = fsSig;
-    while ((wSig+wEsp+wNum) > maxPW && fsN > 20) {
-      fsN -= 4; fsS = Math.round(fsN*0.38);
-      ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
-      ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`; wSig = ctx.measureText('$').width;
-    }
-    const totalW = wSig + wEsp + wNum;
-    const startX = precColX - totalW/2;
-    const numY   = precZonaY + precH*0.72;
-    ctx.fillStyle = '#FFE000';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
-    ctx.fillText('$', startX, numY);
-    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
-    ctx.fillText(precStr, startX + wSig + wEsp, numY);
-  });
-
-  // ── LÍNEAS DE CORTE ───────────────────────────────────────
-  ctx.save();
-  ctx.setLineDash([24,24]);
-  ctx.strokeStyle = 'rgba(140,140,140,0.45)';
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(0, CH);   ctx.lineTo(CW*2, CH);
-  ctx.moveTo(CW, 0);   ctx.lineTo(CW,   CH*2);
-  ctx.stroke();
-  ctx.restore();
-
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'combos_' + new Date().toISOString().slice(0,10) + '.png';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast('✓ Imagen descargada — imprimí al 100%');
-  }, 'image/png');
-}
 // ── Info sistema ──────────────────────────────────────────────
 function cargarInfo() {
   document.getElementById('sync-date').textContent = '...';
@@ -1952,7 +1920,7 @@ cargarInfo();
 cargarSecciones();
 cargarOfertaActiva();
 actualizarOferta();
-cargarComboActivo();
+cargarCombosGuardados();
 actualizarCombo();
 renderLista();
 </script>
