@@ -586,21 +586,60 @@
   <!-- MÓDULO IMPORTAR -->
   <div class="modulo" id="mod-importar">
     <div class="import-layout">
-      <div class="import-card">
+      <div class="import-card" style="width:520px;">
+
         <div class="import-icon">📥</div>
-        <div class="import-title">Importar lista de productos</div>
-        <div class="import-sub">Para actualizar los precios, ejecutá el script Python con el nuevo Excel de Odoo</div>
-        <div class="import-steps">
-          <div>1. Exportá el listado de productos desde Odoo incluyendo <strong>Categoría del producto</strong> y <strong>Código de barras</strong></div>
-          <div>2. Colocá el Excel en la misma carpeta que <code>importar_productos_v2.py</code></div>
-          <div>3. Ejecutá en la Terminal: <code>python3 importar_productos_v2.py</code></div>
-          <div>4. Confirmá con <code>s</code> y esperá que termine</div>
+        <div class="import-title">Importar lista de precios</div>
+        <div class="import-sub">Arrastrá el Excel exportado desde Odoo o hacé clic para seleccionarlo</div>
+
+        <!-- Zona drag & drop -->
+        <div id="drop-zone" style="
+          border: 2px dashed var(--border);
+          border-radius: var(--radius-lg);
+          padding: 32px 20px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin: 16px 0;
+          background: var(--bg);
+        " onclick="document.getElementById('file-input').click()"
+           ondragover="dragOver(event)"
+           ondragleave="dragLeave(event)"
+           ondrop="dropFile(event)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div id="drop-text" style="font-size:14px;font-weight:500;color:var(--text);">Soltá el archivo acá</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">o hacé clic para buscar · Excel de Odoo (.xlsx)</div>
+          <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="archivoSeleccionado(this.files[0])">
         </div>
-        <button class="btn-primary" style="width:auto;margin:0 auto;" onclick="cargarInfo()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-          Actualizar estado
-        </button>
-        <div id="import-status" style="margin-top:16px;font-size:12px;color:var(--muted);"></div>
+
+        <!-- Estado y progreso -->
+        <div id="import-progress" style="display:none;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;">
+            <span id="import-prog-txt" style="color:var(--muted);">Procesando...</span>
+            <span id="import-prog-pct" style="font-weight:600;">0%</span>
+          </div>
+          <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;border:1px solid var(--border);">
+            <div id="import-prog-bar" style="height:100%;background:var(--text);border-radius:3px;width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+
+        <!-- Info última importación -->
+        <div id="import-info" style="background:var(--bg);border-radius:var(--radius);padding:12px;font-size:12px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--muted);">Última importación</span>
+            <span id="import-fecha" style="font-weight:500;">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="color:var(--muted);">Productos cargados</span>
+            <span id="import-total" style="font-weight:500;">—</span>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;text-align:left;">
+          El Excel debe incluir las columnas: <strong>Nombre</strong>, <strong>Precio de venta</strong>, <strong>Categoría del producto</strong> y <strong>Código de barras</strong>.
+          Los precios se cargan con IVA 21% aplicado automáticamente.
+        </div>
+
       </div>
     </div>
   </div>
@@ -900,7 +939,13 @@ function renderLista() {
           <div class="li-nombre">${p.nombre}</div>
           <div class="li-seccion">${p.seccion}</div>
         </div>
-        <div class="li-precio">$\u00a0${p.precio.toLocaleString('es-AR')}</div>
+        <div style="display:flex;align-items:center;gap:3px;">
+          <span style="font-size:11px;color:var(--muted);font-weight:500;">$</span>
+          <input type="number" value="${p.precio}"
+            style="width:70px;font-size:12px;font-weight:600;font-family:var(--mono);padding:3px 5px;border:0.5px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);text-align:right;"
+            onchange="editarPrecioLista(${i}, this.value)"
+            onclick="this.select()">
+        </div>
         <div class="copias">
           <button onclick="cambiarCopias(${i},-1)">−</button>
           <span>${p.copias}</span>
@@ -2130,6 +2175,178 @@ function generarPNGCombo() {
     URL.revokeObjectURL(url);
     toast('✓ Imagen descargada — imprimí al 100%');
   }, 'image/png');
+}
+
+
+// ── Editar precio en lista — guarda en Sheet ─────────────────
+function editarPrecioLista(idx, valor) {
+  const nuevoPrecio = parseInt(valor) || 0;
+  if (!nuevoPrecio || nuevoPrecio === lista[idx].precio) return;
+  const item = lista[idx];
+  item.precio = nuevoPrecio;
+  actualizarStats();
+
+  // Guardar nuevo precio en el Sheet
+  const barcode = item.barcode;
+  if (!barcode) {
+    toast('Precio actualizado en la lista (sin código de barras para guardar en Sheet)');
+    return;
+  }
+
+  fetch(`${SCRIPT_URL}?accion=actualizarPrecio&barcode=${encodeURIComponent(barcode)}&precio=${nuevoPrecio}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        toast('✓ Precio actualizado: ' + item.nombre);
+      } else {
+        toast('Precio actualizado en lista (error al guardar: ' + (data.error||'') + ')', true);
+      }
+    })
+    .catch(() => toast('Precio actualizado en lista (sin conexión)', false));
+}
+
+// ── Drag & drop importación ───────────────────────────────────
+function dragOver(e) {
+  e.preventDefault();
+  const dz = document.getElementById('drop-zone');
+  dz.style.borderColor = 'var(--text)';
+  dz.style.background  = 'var(--surface)';
+  document.getElementById('drop-text').textContent = '¡Soltá el archivo!';
+}
+
+function dragLeave(e) {
+  const dz = document.getElementById('drop-zone');
+  dz.style.borderColor = 'var(--border)';
+  dz.style.background  = 'var(--bg)';
+  document.getElementById('drop-text').textContent = 'Soltá el archivo acá';
+}
+
+function dropFile(e) {
+  e.preventDefault();
+  dragLeave(e);
+  const file = e.dataTransfer.files[0];
+  if (file) archivoSeleccionado(file);
+}
+
+function archivoSeleccionado(file) {
+  if (!file) return;
+  if (!file.name.match(/\.xlsx?$/i)) {
+    toast('Solo se aceptan archivos Excel (.xlsx)', true);
+    return;
+  }
+
+  document.getElementById('drop-text').textContent = file.name;
+  document.getElementById('drop-zone').style.borderColor = 'var(--success)';
+
+  // Leer con SheetJS
+  if (typeof XLSX === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    script.onload = () => procesarExcel(file);
+    document.head.appendChild(script);
+  } else {
+    procesarExcel(file);
+  }
+}
+
+function procesarExcel(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const workbook  = XLSX.read(e.target.result, { type: 'array' });
+      const sheet     = workbook.Sheets[workbook.SheetNames[0]];
+      const filas     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      if (!filas.length) { toast('El archivo está vacío', true); return; }
+
+      // Detectar columnas
+      const primeraFila = filas[0];
+      const cols = Object.keys(primeraFila);
+      const colNombre   = cols.find(c => c.toLowerCase().includes('nombre'));
+      const colPrecio   = cols.find(c => c.toLowerCase().includes('precio') && c.toLowerCase().includes('venta'));
+      const colCategoria = cols.find(c => c.toLowerCase().includes('categor'));
+      const colBarcode  = cols.find(c => c.toLowerCase().includes('barras') || c.toLowerCase().includes('barcode'));
+
+      if (!colNombre || !colPrecio) {
+        toast('No se encontraron las columnas Nombre y Precio de venta', true);
+        return;
+      }
+
+      // Procesar filas
+      const productos = [];
+      filas.forEach(fila => {
+        const nombre = String(fila[colNombre] || '').trim();
+        if (!nombre || nombre === 'nan') return;
+        const precio = parseFloat(fila[colPrecio]) || 0;
+        let barcode  = colBarcode ? String(fila[colBarcode] || '').trim() : '';
+        if (barcode.endsWith('.0')) barcode = barcode.slice(0, -2);
+        const cat    = colCategoria ? String(fila[colCategoria] || '').trim() : '';
+        productos.push({ nombre, precioVenta: precio, codigoBarras: barcode, categoria: cat });
+      });
+
+      if (!productos.length) { toast('No se encontraron productos válidos', true); return; }
+
+      if (!confirm(`Se van a importar ${productos.length} productos y reemplazar la lista actual. ¿Continuar?`)) return;
+
+      importarProductosWeb(productos);
+    } catch(err) {
+      toast('Error al leer el archivo: ' + err.message, true);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function importarProductosWeb(productos) {
+  const progDiv = document.getElementById('import-progress');
+  const progTxt = document.getElementById('import-prog-txt');
+  const progPct = document.getElementById('import-prog-pct');
+  const progBar = document.getElementById('import-prog-bar');
+  progDiv.style.display = 'block';
+
+  const BATCH = 200;
+  const lotes  = [];
+  for (let i = 0; i < productos.length; i += BATCH)
+    lotes.push(productos.slice(i, i + BATCH));
+
+  let importados = 0;
+
+  async function enviarLote(i) {
+    if (i >= lotes.length) {
+      // Terminó
+      progTxt.textContent = `✓ ${importados} productos importados`;
+      progPct.textContent = '100%';
+      progBar.style.width = '100%';
+      progBar.style.background = 'var(--success)';
+      toast('✓ ' + importados + ' productos importados correctamente');
+      cargarInfo();
+      return;
+    }
+
+    const pct = Math.round(i / lotes.length * 100);
+    progTxt.textContent = `Enviando lote ${i+1} de ${lotes.length}...`;
+    progPct.textContent = pct + '%';
+    progBar.style.width = pct + '%';
+
+    try {
+      const resp = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ accion: 'importarProductos', productos: lotes[i], lote: i+1 }),
+        redirect: 'follow',
+      });
+      const data = JSON.parse(await resp.text());
+      if (data.ok) {
+        importados += data.importados || lotes[i].length;
+        enviarLote(i + 1);
+      } else {
+        toast('Error en lote ' + (i+1) + ': ' + (data.error||''), true);
+      }
+    } catch(err) {
+      toast('Error de conexión en lote ' + (i+1), true);
+    }
+  }
+
+  enviarLote(0);
 }
 
 // ── Info sistema ──────────────────────────────────────────────
