@@ -384,100 +384,110 @@
 
   <!-- MÓDULO OFERTA -->
   <div class="modulo" id="mod-oferta">
-    <div class="oferta-layout">
-      <div class="oferta-form" style="width:100%;display:flex;flex-direction:column;gap:12px;overflow-y:auto;">
+    <div style="display:flex;flex:1;overflow:hidden;">
 
-        <!-- Tabs solo visibles en ½ A4 -->
-        <div id="oferta-tabs-selector" style="display:none;gap:4px;flex-shrink:0;">
-          <button class="combo-tab active" onclick="setOfertaTab(0,this)">Oferta 1</button>
-          <button class="combo-tab" onclick="setOfertaTab(1,this)">Oferta 2</button>
-        </div>
+      <!-- Panel izquierdo: agregar oferta -->
+      <div style="width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+        <div class="col-header">Nueva oferta</div>
+        <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;">
 
-        <div style="display:flex;gap:12px;flex:1;min-height:0;overflow-y:auto;">
-          <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:260px;">
-
-            <div class="form-card">
-              <div class="form-title">Producto</div>
-              <div class="input-wrap" style="margin-bottom:8px">
-                <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" id="of-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto..." oninput="buscarOferta(this.value)">
-              </div>
-              <div id="of-resultados" style="display:none; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:8px;"></div>
-              <div class="form-group">
-                <label class="form-label">Nombre en el cartel</label>
-                <input type="text" class="form-input" id="of-nombre" placeholder="Ej: Pepsi Cola 2,25 L" oninput="guardarOfertaActiva();actualizarOferta()">
-              </div>
+          <div class="form-card">
+            <div class="form-title">Producto</div>
+            <div class="input-wrap" style="margin-bottom:8px">
+              <svg class="input-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" id="of-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto..." oninput="buscarOferta(this.value)">
             </div>
-
-            <div class="form-card">
-              <div class="form-title">Precios</div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Precio normal ($)</label>
-                  <input type="number" class="form-input" id="of-precio-normal" placeholder="2200" oninput="guardarOfertaActiva();actualizarOferta()">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Precio oferta ($)</label>
-                  <input type="number" class="form-input" id="of-precio-oferta" placeholder="1900" oninput="guardarOfertaActiva();actualizarOferta()">
-                </div>
-              </div>
-              <div class="info-row" style="padding:6px 0 0">
-                <span>Ahorrás</span>
-                <span id="of-ahorro" style="font-weight:700;color:var(--success)">—</span>
-              </div>
-            </div>
-
-            <div class="form-card">
-              <div class="form-title">Diseño</div>
-              <div class="form-group">
-                <label class="form-label">Cabecera</label>
-                <select class="form-input" id="of-cabecera" onchange="guardarOfertaActiva();actualizarOferta()">
-                  <option>OFERTA</option>
-                  <option>PRECIO ESPECIAL</option>
-                  <option>¡APROVECHÁ!</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Color</label>
-                <div class="color-opts" id="of-color-opts">
-                  <div class="color-opt selected" style="background:#CC0000" onclick="setColorOferta('rojo',this)" title="Rojo"></div>
-                  <div class="color-opt" style="background:#1a56a0" onclick="setColorOferta('azul',this)" title="Azul"></div>
-                  <div class="color-opt" style="background:#1a7a3c" onclick="setColorOferta('verde',this)" title="Verde"></div>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Válido hasta</label>
-                <input type="date" class="form-input" id="of-vigencia" onchange="guardarOfertaActiva();actualizarOferta()">
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Vista previa -->
-          <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
-            <div class="form-card" style="flex:1;display:flex;flex-direction:column;">
-              <div class="form-title">Vista previa</div>
-              <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);border-radius:var(--radius);">
-                <div id="oferta-preview-wrap"></div>
-              </div>
+            <div id="of-resultados" style="display:none;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px;max-height:180px;overflow-y:auto;"></div>
+            <div class="form-group">
+              <label class="form-label">Nombre en el cartel</label>
+              <input type="text" class="form-input" id="of-nombre" placeholder="Ej: Pepsi Cola 2,25 L" oninput="actualizarOferta()">
             </div>
           </div>
-        </div>
 
-        <button class="btn-primary" onclick="imprimirOferta()" style="flex-shrink:0;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          <span id="btn-oferta-txt">Generar imagen</span>
-        </button>
-      </div>
-
-      <div class="oferta-preview-col">
-        <div class="form-card" style="flex:1;display:flex;flex-direction:column;">
-          <div class="form-title">Vista previa</div>
-          <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--bg);border-radius:var(--radius);">
-            <div id="oferta-preview-wrap"></div>
+          <div class="form-card">
+            <div class="form-title">Precios</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Precio normal ($)</label>
+                <input type="number" class="form-input" id="of-precio-normal" placeholder="2200" oninput="actualizarOferta()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Precio oferta ($)</label>
+                <input type="number" class="form-input" id="of-precio-oferta" placeholder="1900" oninput="actualizarOferta()">
+              </div>
+            </div>
+            <div class="info-row" style="padding:4px 0 0">
+              <span>Ahorrás</span>
+              <span id="of-ahorro" style="font-weight:700;color:var(--success)">—</span>
+            </div>
           </div>
+
+          <div class="form-card">
+            <div class="form-title">Diseño</div>
+            <div class="form-group">
+              <label class="form-label">Cabecera</label>
+              <select class="form-input" id="of-cabecera" onchange="actualizarOferta()">
+                <option>OFERTA</option>
+                <option>PRECIO ESPECIAL</option>
+                <option>¡APROVECHÁ!</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color</label>
+              <div class="color-opts" id="of-color-opts">
+                <div class="color-opt selected" style="background:#CC0000" onclick="setColorOferta('rojo',this)" title="Rojo"></div>
+                <div class="color-opt" style="background:#1a56a0" onclick="setColorOferta('azul',this)" title="Azul"></div>
+                <div class="color-opt" style="background:#1a7a3c" onclick="setColorOferta('verde',this)" title="Verde"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Válido hasta</label>
+              <input type="date" class="form-input" id="of-vigencia" onchange="actualizarOferta()">
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="agregarOfertaALista()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Agregar oferta
+          </button>
         </div>
       </div>
+
+      <!-- Panel central: lista de ofertas -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);">
+        <div class="col-header">
+          Lista de ofertas
+          <span class="badge" id="of-badge">0 ofertas · 0 hojas</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;" id="of-lista-items">
+          <div class="lista-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 8px;display:block"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            La lista está vacía
+            <p>Agregá ofertas con el formulario</p>
+          </div>
+        </div>
+        <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;">
+          <button class="btn-primary" style="flex:1;" id="btn-imprimir-ofertas" onclick="imprimirListaOfertas()" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span id="btn-of-txt">Generar imagen</span>
+          </button>
+          <button class="btn-secondary" style="width:auto;padding:8px 12px;" onclick="vaciarListaOfertas()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel derecho: vista previa -->
+      <div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="col-header">
+          Vista previa
+          <div style="display:flex;gap:4px;" id="of-paginador"></div>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);overflow:hidden;">
+          <div id="oferta-preview-wrap"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -485,29 +495,16 @@
   <div class="modulo" id="mod-combo">
     <div style="display:flex;flex:1;overflow:hidden;">
 
-      <!-- Panel izquierdo: lista de combos guardados -->
-      <div style="width:260px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
-        <div class="col-header">
-          Combos guardados
-          <button class="btn-scan" style="padding:4px 8px;font-size:11px;width:auto;" onclick="nuevoCombo()">+ Nuevo</button>
-        </div>
-        <div style="flex:1;overflow-y:auto;" id="combo-lista-guardados">
-          <div class="res-empty">Cargando combos...</div>
-        </div>
-      </div>
+      <!-- Panel izquierdo: formulario nuevo combo -->
+      <div style="width:300px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+        <div class="col-header">Nuevo combo</div>
+        <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;">
 
-      <!-- Panel central: formulario -->
-      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);">
-        <div class="col-header" id="combo-form-titulo">Nuevo combo</div>
-        <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;">
-
-          <!-- Nombre del combo -->
           <div class="form-card">
             <div class="form-title">Nombre del combo</div>
-            <input type="text" class="form-input" id="co-nombre-combo" placeholder="Ej: Pack Finde, Combo Picada..." oninput="marcarModificado()">
+            <input type="text" class="form-input" id="co-nombre-combo" placeholder="Ej: Pack Finde, Combo Picada...">
           </div>
 
-          <!-- Buscador de productos -->
           <div class="form-card">
             <div class="form-title">Agregar productos</div>
             <div class="input-wrap" style="margin-bottom:6px">
@@ -515,22 +512,20 @@
               <input type="text" id="co-busqueda" class="form-input" style="padding-left:32px" placeholder="Buscar producto o escanear..." oninput="buscarProductoCombo(this.value)">
             </div>
             <div id="co-resultados" style="display:none;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:6px;max-height:160px;overflow-y:auto;"></div>
-            <!-- Lista de productos del combo -->
             <div id="co-productos-lista" style="display:flex;flex-direction:column;gap:4px;"></div>
             <div id="co-max-aviso" style="display:none;font-size:11px;color:var(--muted);margin-top:4px;">Máximo 4 productos por combo</div>
           </div>
 
-          <!-- Precio y diseño -->
           <div class="form-card">
             <div class="form-title">Precio y diseño</div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Precio combo ($)</label>
-                <input type="number" class="form-input" id="co-precio" placeholder="5500" oninput="actualizarResumenCombo();marcarModificado()">
+                <input type="number" class="form-input" id="co-precio" placeholder="5500" oninput="actualizarResumenCombo()">
               </div>
               <div class="form-group">
                 <label class="form-label">Válido hasta</label>
-                <input type="date" class="form-input" id="co-vigencia" onchange="marcarModificado()">
+                <input type="date" class="form-input" id="co-vigencia">
               </div>
             </div>
             <div class="info-row" style="padding:4px 0 0"><span>Precio por separado</span><span id="co-sep">—</span></div>
@@ -541,7 +536,7 @@
             <div class="form-title">Diseño del cartel</div>
             <div class="form-group">
               <label class="form-label">Cabecera</label>
-              <select class="form-input" id="co-cabecera" onchange="actualizarCombo();marcarModificado()">
+              <select class="form-input" id="co-cabecera" onchange="actualizarCombo()">
                 <option>COMBO</option>
                 <option>LLEVÁ LOS DOS</option>
                 <option>PACK AHORRO</option>
@@ -557,24 +552,52 @@
             </div>
           </div>
 
-          <!-- Botones -->
-          <div style="display:flex;gap:8px;">
-            <button class="btn-primary" style="flex:1;" onclick="guardarComboDB()" id="btn-guardar-combo">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-              Guardar combo
-            </button>
-            <button class="btn-primary" style="flex:1;" onclick="imprimirComboActual()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Imprimir
-            </button>
+          <button class="btn-primary" onclick="agregarComboALista()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Agregar combo
+          </button>
+
+          <!-- Combos guardados -->
+          <div class="form-card">
+            <div class="form-title">Combos guardados</div>
+            <div id="combo-lista-guardados" style="max-height:200px;overflow-y:auto;">
+              <div class="res-empty" style="padding:8px;">Cargando...</div>
+            </div>
           </div>
 
         </div>
       </div>
 
+      <!-- Panel central: lista de combos para imprimir -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);">
+        <div class="col-header">
+          Lista para imprimir
+          <span class="badge" id="co-badge">0 combos · 0 hojas</span>
+        </div>
+        <div style="flex:1;overflow-y:auto;" id="co-lista-items">
+          <div class="lista-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 8px;display:block"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            La lista está vacía
+            <p>Agregá combos con el formulario</p>
+          </div>
+        </div>
+        <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;">
+          <button class="btn-primary" style="flex:1;" id="btn-imprimir-combos" onclick="imprimirListaCombos()" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span id="btn-co-txt">Generar imagen</span>
+          </button>
+          <button class="btn-secondary" style="width:auto;padding:8px 12px;" onclick="vaciarListaCombos()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          </button>
+        </div>
+      </div>
+
       <!-- Panel derecho: vista previa -->
-      <div style="width:280px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
-        <div class="col-header">Vista previa</div>
+      <div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="col-header">
+          Vista previa
+          <div style="display:flex;gap:4px;" id="co-paginador"></div>
+        </div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:var(--bg);overflow:hidden;">
           <div id="combo-preview-wrap"></div>
         </div>
@@ -1174,21 +1197,42 @@ function generarPDFGondola() {
   toast('PDF descargado');
 }
 
-// ── Oferta ────────────────────────────────────────────────────
+// ── Oferta — estado ──────────────────────────────────────────
+let listaOfertas  = [];   // [{nombre, normal, oferta, cabecera, color, vigencia}]
+let ofPaginaPreview = 0;
+
+function setTabOferta(tam) {
+  tamañoOferta = tam;
+  document.querySelectorAll('#tabs-oferta .tab').forEach((t,i) => {
+    t.classList.toggle('active', (tam==='medio' && i===0)||(tam==='completo' && i===1));
+  });
+  const btnTxt = document.getElementById('btn-of-txt');
+  if (btnTxt) btnTxt.textContent = tam==='medio' ? 'Generar imagen — ½ A4' : 'Generar imagen — A4';
+  renderListaOfertas();
+  actualizarOferta();
+}
+
+function setColorOferta(color, el) {
+  colorOferta = color;
+  document.querySelectorAll('#of-color-opts .color-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  actualizarOferta();
+}
+
 function buscarOferta(valor) {
   clearTimeout(busquedaTimer);
   const cont = document.getElementById('of-resultados');
-  if (!valor || valor.length < 2) { cont.style.display = 'none'; return; }
+  if (!valor || valor.length < 2) { cont.style.display='none'; return; }
   busquedaTimer = setTimeout(() => {
     fetch(`${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(valor)}`)
       .then(r => r.json())
       .then(data => {
-        if (!data.resultados?.length) { cont.style.display = 'none'; return; }
+        if (!data.resultados?.length) { cont.style.display='none'; return; }
         cont.style.display = 'block';
         cont.innerHTML = data.resultados.slice(0,5).map(p => `
           <div class="res-item" onclick="seleccionarOferta(${JSON.stringify(p).replace(/"/g,'&quot;')})">
             <div class="ri-info"><div class="res-nombre">${p.nombre}</div></div>
-            <div class="res-precio">$\u00a0${p.precioConIVA.toLocaleString('es-AR')}</div>
+            <div class="res-precio">$ ${(p.precioConIVA||0).toLocaleString('es-AR')}</div>
           </div>`).join('');
       });
   }, 300);
@@ -1199,15 +1243,6 @@ function seleccionarOferta(p) {
   document.getElementById('of-precio-normal').value = p.precioConIVA;
   document.getElementById('of-busqueda').value = p.nombre;
   document.getElementById('of-resultados').style.display = 'none';
-  guardarOfertaActiva();
-  actualizarOferta();
-}
-
-function setColorOferta(color, el) {
-  colorOferta = color;
-  document.querySelectorAll('#of-color-opts .color-opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  guardarOfertaActiva();
   actualizarOferta();
 }
 
@@ -1215,577 +1250,394 @@ function actualizarOferta() {
   const normal  = parseFloat(document.getElementById('of-precio-normal').value) || 0;
   const oferta  = parseFloat(document.getElementById('of-precio-oferta').value) || 0;
   const ahorro  = normal - oferta;
-  const nombre  = document.getElementById('of-nombre').value || 'Nombre del producto';
-  const cabecera = document.getElementById('of-cabecera').value;
-  const vigEl   = document.getElementById('of-vigencia').value;
-  const vigencia = vigEl ? new Date(vigEl + 'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-
-  document.getElementById('of-ahorro').textContent = ahorro > 0 ? '$ ' + ahorro.toLocaleString('es-AR') : '—';
-
-  const c = COLORES[colorOferta];
-  const isMedio = tamañoOferta === 'medio';
-  const w = isMedio ? 280 : 220;
-  const h = isMedio ? 148 : 320;
-
-  const fsHeader  = isMedio ? 18 : 22;
-  const fsNombre  = isMedio ? 13 : 16;
-  const fsAntes   = isMedio ? 9  : 11;
-  const fsPrecioAnt = isMedio ? 13 : 16;
-  const fsSig     = isMedio ? 22 : 26;
-  const fsNum     = oferta >= 10000 ? (isMedio ? 38 : 54) : (isMedio ? 48 : 70);
-  const fsAhorro  = isMedio ? 11 : 14;
-  const fsVig     = isMedio ? 9  : 11;
-
-  document.getElementById('oferta-preview-wrap').innerHTML = `
-    <div style="width:${w}px;height:${h}px;background:${c.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;border-radius:4px;">
-      <div style="background:${c.header};text-align:center;padding:${isMedio?'7px':'10px'};">
-        <span style="color:#FFE000;font-weight:900;font-size:${fsHeader}px;text-transform:uppercase;letter-spacing:0.1em;">${cabecera}</span>
-      </div>
-      <div style="color:white;font-weight:700;text-align:center;padding:${isMedio?'6px 10px 2px':'10px 14px 4px'};font-size:${fsNombre}px;line-height:1.15;">${nombre}</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:2px 0;">
-        <span style="color:rgba(255,255,255,0.55);font-weight:700;font-size:${fsAntes}px;text-transform:uppercase;">Antes</span>
-        <span style="color:rgba(255,255,255,0.45);font-weight:700;font-size:${fsPrecioAnt}px;text-decoration:line-through;">$ ${normal>0?normal.toLocaleString('es-AR'):'—'}</span>
-      </div>
-      <div style="display:flex;align-items:baseline;justify-content:center;gap:3px;flex:1;padding:0 8px;">
-        <span style="color:#FFE000;font-weight:900;font-size:${fsSig}px;">$</span>
-        <span style="color:#FFE000;font-weight:900;font-size:${fsNum}px;line-height:1;white-space:nowrap;">${oferta>0?oferta.toLocaleString('es-AR'):'—'}</span>
-      </div>
-      <div style="background:#FFE000;text-align:center;font-weight:900;font-size:${fsAhorro}px;padding:${isMedio?'5px':'8px'} 0;text-transform:uppercase;color:${c.header};">
-        Ahorrás $ ${ahorro>0?ahorro.toLocaleString('es-AR'):'—'}
-      </div>
-      <div style="text-align:center;color:rgba(255,255,255,0.7);font-size:${fsVig}px;padding:${isMedio?'4px':'7px'} 0 ${isMedio?'5px':'8px'};">
-        Válido hasta el ${vigencia}
-      </div>
-    </div>`;
+  document.getElementById('of-ahorro').textContent = ahorro > 0 ? '$ '+ahorro.toLocaleString('es-AR') : '—';
+  renderPreviewOferta();
 }
 
-function imprimirOferta() {
-  const nombre = document.getElementById('of-nombre').value;
+function agregarOfertaALista() {
+  const nombre = document.getElementById('of-nombre').value.trim();
   const normal = parseFloat(document.getElementById('of-precio-normal').value) || 0;
   const oferta = parseFloat(document.getElementById('of-precio-oferta').value) || 0;
-  if (!nombre || !oferta) { toast('Completá nombre y precio de oferta', true); return; }
-  toast('Generando imagen...');
-  // Esperar que las fuentes estén listas
-  document.fonts.ready.then(() => generarPNGOferta(nombre, normal, oferta));
+  if (!nombre) { toast('Ingresá el nombre del producto', true); return; }
+  if (!oferta) { toast('Ingresá el precio de oferta', true); return; }
+
+  listaOfertas.push({
+    nombre, normal, oferta,
+    cabecera: document.getElementById('of-cabecera').value,
+    color:    colorOferta,
+    vigencia: document.getElementById('of-vigencia').value,
+  });
+
+  // Limpiar formulario
+  document.getElementById('of-nombre').value = '';
+  document.getElementById('of-busqueda').value = '';
+  document.getElementById('of-precio-normal').value = '';
+  document.getElementById('of-precio-oferta').value = '';
+  document.getElementById('of-ahorro').textContent = '—';
+
+  toast('Oferta agregada');
+  renderListaOfertas();
+  renderPreviewOferta();
 }
 
-function generarPNGOferta(nombreIn, normalIn, ofertaIn) {
-  let nombre = nombreIn, normal = normalIn, oferta = ofertaIn;
-  const isMedio  = tamañoOferta === 'medio';
-  let c        = COLORES[colorOferta];
-  let cabecera = document.getElementById('of-cabecera').value;
-  const vigEl  = document.getElementById('of-vigencia').value;
-  let vigencia = vigEl ? new Date(vigEl+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-  let ahorro   = normal - oferta;
+function quitarOferta(idx) {
+  listaOfertas.splice(idx, 1);
+  renderListaOfertas();
+  renderPreviewOferta();
+}
 
-  // Valores aprobados (en px CSS → escalar a 300dpi)
-  // A4 a 300dpi: 2480×3508px  |  ½A4 (apaisado) a 300dpi: 2480×1748px
-  // Escala: 1px CSS (en cartel de 273px ancho) → 2480/210mm*factor
-  // Usamos directamente píxeles a 300dpi
+function vaciarListaOfertas() {
+  if (!listaOfertas.length) return;
+  if (!confirm('¿Vaciar la lista de ofertas?')) return;
+  listaOfertas = [];
+  renderListaOfertas();
+  renderPreviewOferta();
+}
+
+function renderListaOfertas() {
+  const cont = document.getElementById('of-lista-items');
+  const btn  = document.getElementById('btn-imprimir-ofertas');
+  if (!cont) return;
+
+  const porHoja = tamañoOferta === 'medio' ? 2 : 1;
+  const hojas   = Math.ceil(listaOfertas.length / porHoja) || 0;
+  const badge   = document.getElementById('of-badge');
+  if (badge) badge.textContent = `${listaOfertas.length} oferta${listaOfertas.length!==1?'s':''} · ${hojas} hoja${hojas!==1?'s':''}`;
+  if (btn)  btn.disabled = listaOfertas.length === 0;
+
+  if (!listaOfertas.length) {
+    cont.innerHTML = `<div class="lista-empty">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 8px;display:block"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      La lista está vacía<p>Agregá ofertas con el formulario</p></div>`;
+    return;
+  }
+
+  const c = COLORES;
+  cont.innerHTML = listaOfertas.map((o, i) => {
+    const col = c[o.color] || c.rojo;
+    const ahorro = o.normal - o.oferta;
+    return `<div style="display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);gap:10px;">
+      <div style="width:10px;height:32px;background:${col.fondo};border-radius:3px;flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);">${o.cabecera} · $${o.oferta.toLocaleString('es-AR')} · Ahorrás $${ahorro.toLocaleString('es-AR')}</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">Hoja ${Math.floor(i/porHoja)+1}</div>
+      <div class="li-del" onclick="quitarOferta(${i})">✕</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPreviewOferta() {
+  const wrap = document.getElementById('oferta-preview-wrap');
+  const pag  = document.getElementById('of-paginador');
+  if (!wrap) return;
+
+  const porHoja = tamañoOferta === 'medio' ? 2 : 1;
+  const hojas   = Math.max(1, Math.ceil(listaOfertas.length / porHoja));
+
+  // Paginador
+  if (pag) {
+    pag.innerHTML = hojas > 1 ? `
+      <button onclick="ofPaginaPreview=Math.max(0,ofPaginaPreview-1);renderPreviewOferta()" style="background:none;border:0.5px solid var(--border);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:11px;">←</button>
+      <span style="font-size:11px;color:var(--muted);">${ofPaginaPreview+1}/${hojas}</span>
+      <button onclick="ofPaginaPreview=Math.min(${hojas-1},ofPaginaPreview+1);renderPreviewOferta()" style="background:none;border:0.5px solid var(--border);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:11px;">→</button>` : '';
+  }
+  ofPaginaPreview = Math.min(ofPaginaPreview, hojas-1);
+
+  // Renderizar hoja actual
+  const inicio = ofPaginaPreview * porHoja;
+  const pagOfertas = listaOfertas.slice(inicio, inicio + porHoja);
+
+  // Rellenar con vacíos si es ½ A4 y solo hay 1
+  while (tamañoOferta === 'medio' && pagOfertas.length < 2) pagOfertas.push(null);
+
+  if (tamañoOferta === 'medio') {
+    // Hoja A4 con 2 carteles apaisados
+    wrap.innerHTML = `<div style="width:220px;background:white;border:0.5px solid #ccc;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;flex-direction:column;">
+      ${pagOfertas.map((o, i) => miniCartelOferta(o, i, 220, 77)).join('<div style="height:1px;background:repeating-linear-gradient(90deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);"></div>')}
+    </div>`;
+  } else {
+    const o = pagOfertas[0] || null;
+    wrap.innerHTML = `<div style="width:155px;">` + miniCartelOferta(o, 0, 155, 220) + `</div>`;
+  }
+}
+
+function miniCartelOferta(o, i, W, H) {
+  if (!o) return `<div style="width:${W}px;height:${H}px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;"><span style="font-size:10px;color:#ccc;">Espacio vacío</span></div>`;
+  const col    = COLORES[o.color] || COLORES.rojo;
+  const ahorro = o.normal - o.oferta;
+  const hH     = Math.round(H*0.13);
+  const ahoH   = Math.round(H*0.13);
+  const fsN    = Math.round(H*0.22);
+  const fsS    = Math.round(fsN*0.42);
+  return `<div style="width:${W}px;height:${H}px;background:${col.fondo};display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;">
+    <div style="background:${col.header};height:${hH}px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <span style="color:#FFE000;font-weight:900;font-size:${Math.round(H*0.07)}px;text-transform:uppercase;letter-spacing:0.08em;">${o.cabecera}</span>
+    </div>
+    <div style="color:white;font-weight:700;text-align:center;font-size:${Math.round(H*0.06)}px;padding:3px 6px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${o.nombre}</div>
+    <div style="text-align:center;color:rgba(255,255,255,0.5);font-size:${Math.round(H*0.042)}px;font-weight:700;flex-shrink:0;">ANTES $ ${o.normal.toLocaleString('es-AR')}</div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:2px;">
+      <span style="color:#FFE000;font-weight:900;font-size:${fsS}px;align-self:flex-end;margin-bottom:2px;">$</span>
+      <span style="color:#FFE000;font-weight:900;font-size:${fsN}px;line-height:1;letter-spacing:-1px;">${o.oferta.toLocaleString('es-AR')}</span>
+    </div>
+    <div style="background:#FFE000;height:${ahoH}px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <span style="color:${col.header};font-weight:900;font-size:${Math.round(H*0.052)}px;text-transform:uppercase;">AHORRÁS $ ${ahorro.toLocaleString('es-AR')}</span>
+    </div>
+    <div style="text-align:center;color:rgba(255,255,255,0.6);font-size:${Math.round(H*0.038)}px;padding:2px 0;flex-shrink:0;">Válido hasta ${o.vigencia||'—'}</div>
+  </div>`;
+}
+
+function imprimirListaOfertas() {
+  if (!listaOfertas.length) return;
+  toast('Generando imagen...');
+  document.fonts.ready.then(() => generarPNGListaOfertas());
+}
+
+function generarPNGListaOfertas() {
   const DPI   = 300;
-  const MM2PX = DPI / 25.4; // 11.81 px/mm
-
-  // Dimensiones reales en px a 300dpi
-  const CW = Math.round(210 * MM2PX); // 2480px
+  const MM2PX = DPI / 25.4;
+  const isMedio = tamañoOferta === 'medio';
+  const CW = Math.round(210 * MM2PX);
   const CH = isMedio ? Math.round(148.5 * MM2PX) : Math.round(297 * MM2PX);
-  // Para medio: hoja A4 tiene 2 carteles → canvas = 2480 × (2×1748) = 2480×3508
-  const canvasW = CW;
-  const canvasH = isMedio ? CH * 2 : CH;
+  const porHoja = isMedio ? 2 : 1;
+  const hojas   = Math.ceil(listaOfertas.length / porHoja);
+  const hexToRgb = hex => [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
 
-  // Factor de escala desde valores aprobados (en cartel 273px = 210mm)
-  const ESC_W = CW / 273;  // escala basada en ancho (2480/273 ≈ 9.08)
+  // Función para dibujar un cartel en el canvas
+  function dibujarCartel(ctx, o, ox, oy, W, H) {
+    if (!o) {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(ox, oy, W, H);
+      return;
+    }
+    const c = COLORES[o.color] || COLORES.rojo;
+    const ESC_W = W / 273;
+    const ESC_H = H / (isMedio ? 193 : 386);
+    const ESC   = isMedio ? Math.min(ESC_H, ESC_W * 0.88) : ESC_W;
 
-  // Para ½ A4 (apaisado): el cartel individual es 2480×1754px
-  // Los valores aprobados son para A4 completo (386px alto en pantalla)
-  // Escalar por el alto del cartel individual para que todo entre
-  const ESC_H = CH / 386;
-  const ESC   = isMedio ? Math.min(ESC_H, ESC_W * 0.88) : ESC_W;
+    const hH    = 35.7 * ESC;
+    const fsCab = Math.round(20 * ESC);
+    const fsNom = Math.round(18 * ESC);
+    const fsAnt = Math.round(8  * ESC);
+    const ahH   = 31.4 * ESC;
+    const vigH  = 8    * ESC;
+    const pad   = 16   * ESC_W;
+    const ahY   = oy + H - ahH - vigH;
 
-  // Valores aprobados multiplicados por ESC
-  const hdrH    = Math.round(46  * ESC);
-  const fsCab   = Math.round(42  * ESC);
-  const fsNom   = Math.round(24  * ESC);
-  const fsAntes = Math.round(12  * ESC);
-  const fsNum   = Math.round(115 * ESC);
-  const fsSig   = Math.round(35  * ESC);
-  const ahoH    = Math.round(44  * ESC);
-  const fsAho   = Math.round(17  * ESC);
-  const fsVig   = Math.round(10  * ESC);
-  const pad     = Math.round(16  * ESC_W);
-
-  const canvas = document.createElement('canvas');
-  canvas.width  = canvasW;
-  canvas.height = canvasH;
-  const ctx = canvas.getContext('2d');
-
-  function dibujarCartel(ox, oy, W, H) {
-    const esc = H / (isMedio ? CH : CH); // siempre 1 por cartel
-
-    // ── FONDO ────────────────────────────────────────
+    // Fondo
     ctx.fillStyle = c.fondo;
     ctx.fillRect(ox, oy, W, H);
 
-    // ── CABECERA ─────────────────────────────────────
-    const hH = Math.round(hdrH * (H / (isMedio ? CH : CH)));
+    // Header
     ctx.fillStyle = c.header;
     ctx.fillRect(ox, oy, W, hH);
     ctx.fillStyle = '#FFE000';
-    ctx.font = `${Math.round(fsCab * H/CH)}px Anton, sans-serif`;
+    ctx.font = `900 ${fsCab}px Anton, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(cabecera, ox + W/2, oy + hH/2);
+    ctx.fillText(o.cabecera, ox + W/2, oy + hH/2);
 
-    // ── NOMBRE ───────────────────────────────────────
+    // Nombre
     ctx.fillStyle = '#FFFFFF';
-    const fsN = Math.round(fsNom * H/CH);
-    ctx.font = `700 ${fsN}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
+    ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
+    let nom = o.nombre;
+    while (ctx.measureText(nom).width > W - pad*2 && nom.length > 3) nom = nom.slice(0,-2)+'…';
     ctx.textBaseline = 'top';
-    // Partir en líneas si no entra
-    const maxW = W - pad*2;
-    const palabras = nombre.split(' ');
-    const lineas = [];
-    let lineaActual = '';
-    for (const p of palabras) {
-      const prueba = lineaActual ? lineaActual + ' ' + p : p;
-      if (ctx.measureText(prueba).width <= maxW) {
-        lineaActual = prueba;
-      } else {
-        if (lineaActual) lineas.push(lineaActual);
-        lineaActual = p;
-      }
-    }
-    if (lineaActual) lineas.push(lineaActual);
-    const nomY = oy + hH + Math.round(fsN * 0.3);
-    lineas.forEach((l, i) => ctx.fillText(l, ox + W/2, nomY + i * Math.round(fsN * 1.2)));
-    const nomBottom = nomY + lineas.length * Math.round(fsN * 1.2);
+    const nomY = oy + hH + fsNom * 0.5;
+    ctx.fillText(nom, ox + W/2, nomY);
 
-    // ── ANTES ────────────────────────────────────────
-    const fsA = Math.round(fsAntes * H/CH);
+    // Antes
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = `700 ${fsA}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    const antY = nomBottom + Math.round(fsA * 0.4);
-    ctx.fillText('ANTES  $ ' + normal.toLocaleString('es-AR'), ox + W/2, antY);
-    const antBottom = antY + fsA * 1.3;
+    ctx.font = `700 ${fsAnt}px 'Oswald', sans-serif`;
+    const antY = nomY + fsNom * 1.2;
+    ctx.fillText('ANTES  $ ' + o.normal.toLocaleString('es-AR'), ox + W/2, antY);
 
-    // ── AHORRO — zona inferior ────────────────────────
-    const aH  = Math.round(ahoH * H/CH);
-    const vigH = Math.round(fsVig * H/CH * 2.5);
-    const aY  = oy + H - aH - vigH;
-
-    // ── PRECIO ───────────────────────────────────────
-    const precioStr = oferta.toLocaleString('es-AR');
-    let fsP = Math.round(fsNum * H/CH);
-    let fsS = Math.round(fsSig * H/CH);
-
-    // Ajustar si no entra en el ancho
-    ctx.font = `${fsP}px 'Bebas Neue', sans-serif`;
-    let wNum = ctx.measureText(precioStr).width;
-    ctx.font = `${fsS}px 'Bebas Neue', sans-serif`;
-    let wSig = ctx.measureText('$').width;
-    const wEsp = Math.round(8 * H/CH);
-    while ((wSig + wEsp + wNum) > maxW && fsP > 40) {
-      fsP -= 4; fsS = Math.round(fsP * 0.30);
-      ctx.font = `${fsP}px 'Bebas Neue', sans-serif`;
-      wNum = ctx.measureText(precioStr).width;
-      ctx.font = `${fsS}px 'Bebas Neue', sans-serif`;
-      wSig = ctx.measureText('$').width;
+    // Precio
+    const precioStr = o.oferta.toLocaleString('es-AR');
+    let fsN = Math.round(84 * ESC);
+    let fsS = Math.round(36 * ESC);
+    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
+    let wN = ctx.measureText(precioStr).width;
+    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
+    let wS = ctx.measureText('$').width;
+    const wEsp = 2 * ESC;
+    const maxW = W - pad * 2;
+    while ((wS+wEsp+wN) > maxW && fsN > 20) {
+      fsN -= 4; fsS = Math.round(fsN*0.42);
+      ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`; wN = ctx.measureText(precioStr).width;
+      ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`; wS = ctx.measureText('$').width;
     }
-
-    const totalW  = wSig + wEsp + wNum;
+    const totalW  = wS + wEsp + wN;
     const startX  = ox + (W - totalW) / 2;
-
-    // Centrar verticalmente entre ANTES y AHORRO
-    const zonaTop = antBottom + Math.round(10 * H/CH);
-    const zonaBot = aY - Math.round(10 * H/CH);
-    const baseY   = zonaTop + (zonaBot - zonaTop) / 2 + fsP * 0.35;
+    const zonaTop = antY + fsAnt * 1.5;
+    const altN    = fsN * 0.3528;
+    const baseY   = (ahY - 2 - zonaTop) / 2 + zonaTop + altN * 0.5;
 
     ctx.fillStyle = '#FFE000';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-
-    // Signo $ — mismo baseline que número
-    ctx.font = `${fsS}px 'Bebas Neue', sans-serif`;
+    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
     ctx.fillText('$', startX, baseY);
+    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
+    ctx.fillText(precioStr, startX + wS + wEsp, baseY);
 
-    ctx.font = `${fsP}px 'Bebas Neue', sans-serif`;
-    ctx.fillText(precioStr, startX + wSig + wEsp, baseY);
-
-    // ── AHORRO ───────────────────────────────────────
+    // Ahorro
     ctx.fillStyle = '#FFE000';
-    ctx.fillRect(ox, aY, W, aH);
+    ctx.fillRect(ox, ahY, W, ahH);
+    const fsAh = Math.round(12 * ESC);
+    ctx.fillStyle = hexToRgb(c.header) ? c.header : '#AA0000';
+    ctx.font = `700 ${fsAh}px 'Oswald', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = c.header;
-    const fsAH = Math.round(fsAho * H/CH);
-    ctx.font = `700 ${fsAH}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('AHORRÁS $ ' + ahorro.toLocaleString('es-AR'), ox + W/2, aY + aH/2);
+    ctx.fillText('AHORRÁS $ ' + (o.normal-o.oferta).toLocaleString('es-AR'), ox+W/2, ahY+ahH/2);
 
-    // ── VIGENCIA ─────────────────────────────────────
+    // Vigencia
+    const fsVig = Math.round(7 * ESC);
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    const fsV = Math.round(fsVig * H/CH);
-    ctx.font = `400 ${fsV}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
+    ctx.font = `400 ${fsVig}px 'Oswald', sans-serif`;
     ctx.textBaseline = 'middle';
-    ctx.fillText('Válido hasta el ' + vigencia, ox + W/2, aY + aH + vigH/2);
+    ctx.fillText('Válido hasta el ' + (o.vigencia || '—'), ox+W/2, ahY+ahH+vigH/2);
 
-    // ── LÍNEA DE CORTE (½ A4) ────────────────────────
-    if (isMedio && oy === 0) {
+    // Línea corte ½ A4
+    if (isMedio && oy > 0) {
       ctx.save();
-      ctx.setLineDash([20, 20]);
-      ctx.strokeStyle = 'rgba(180,180,180,0.6)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(0, CH);
-      ctx.lineTo(canvasW, CH);
-      ctx.stroke();
+      ctx.setLineDash([20,20]);
+      ctx.strokeStyle = 'rgba(150,150,150,0.4)';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(CW, oy); ctx.stroke();
       ctx.restore();
     }
   }
 
-  if (isMedio) {
-    guardarOfertaActiva();
-    [0,1].forEach((idx, pos) => {
-      const d = ofertasData[idx];
-      // Si no tiene datos, dejar celda en blanco
-      if (!d.nombre || !d.oferta) {
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, pos * CH, CW, CH);
-        // Línea de corte
-        if (pos === 0) {
-          ctx.save();
-          ctx.setLineDash([20,20]);
-          ctx.strokeStyle = 'rgba(150,150,150,0.4)';
-          ctx.lineWidth = 4;
-          ctx.beginPath(); ctx.moveTo(0, CH); ctx.lineTo(CW, CH); ctx.stroke();
-          ctx.restore();
-        }
-        return;
-      }
-      nombre   = d.nombre;
-      normal   = d.normal;
-      oferta   = d.oferta;
-      ahorro   = d.normal - d.oferta;
-      cabecera = d.cabecera || 'OFERTA';
-      c        = COLORES[d.color] || c;
-      vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-      dibujarCartel(0, pos * CH, CW, CH);
-    });
-  } else {
-    dibujarCartel(0, 0, CW, CH);
+  // Generar una imagen por hoja
+  const imgs = [];
+  for (let h = 0; h < hojas; h++) {
+    const canvasH = isMedio ? CH * 2 : CH;
+    const canvas  = document.createElement('canvas');
+    canvas.width  = CW;
+    canvas.height = canvasH;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, CW, canvasH);
+
+    if (isMedio) {
+      const o1 = listaOfertas[h*2]   || null;
+      const o2 = listaOfertas[h*2+1] || null;
+      dibujarCartel(ctx, o1, 0, 0,  CW, CH);
+      dibujarCartel(ctx, o2, 0, CH, CW, CH);
+    } else {
+      dibujarCartel(ctx, listaOfertas[h], 0, 0, CW, CH);
+    }
+    imgs.push(canvas);
   }
 
-  // Descargar PNG
-  canvas.toBlob(blob => {
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = 'oferta_' + new Date().toISOString().slice(0,10) + '.png';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast('✓ Imagen descargada — imprimí al 100%');
-  }, 'image/png');
-}
-
-
-function generarPDFCombo() {
-  const { jsPDF } = window.jspdf;
-  // A4 apaisada: 297×210mm, 4 combos A6: 148.5×105mm cada uno
-  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
-  const CW = 148.5, CH = 105;
-  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
-
-  // Guardar combo activo antes de generar
-  guardarComboActivo();
-  const hexToRgb = hex => [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
-
-  // ── Medidas internas ─────────────────────────────────────────
-  const pad     = 3;
-  const hH      = 12;          // alto cabecera superior
-  const precW   = 44;          // ancho panel precio derecho
-  const ahorroH = 11;          // alto franja ahorro inferior
-  const vigH    = 7;           // alto franja vigencia
-  const prodX   = pad;
-  const prodW   = CW - precW - pad * 2;  // ancho zona productos
-
-  // Zona productos: desde hH+pad hasta CH-ahorroH-vigH-pad
-  const prodAreaTop    = hH + pad;
-  const prodAreaBottom = CH - ahorroH - vigH - pad;
-  const prodAreaH      = prodAreaBottom - prodAreaTop;
-
-  // Fuentes — máximo posible
-  const fsCab  = 11;   // cabecera
-  const fsNom  = 9;    // nombre producto — tan grande como entre
-  const fsPrec = 8;    // precio tachado junto al producto
-  const fsAho  = 9;    // franja ahorro
-  const fsVig  = 7;    // vigencia
-  const fsPLabel = 7;  // label "COMBO" en panel precio
-  const fsPAnt = 8;    // precio anterior tachado en panel
-
-  // Precio combo: máximo que entre en el ancho del panel (precW-pad*2)
-  const precStr   = precioCombo.toLocaleString('es-AR');
-  const nChars    = precStr.length + 1.5; // +signo
-  const maxFsCombo = Math.floor((precW - pad*2) / (nChars * 0.58 * 0.3528));
-  const fsCombo   = Math.min(maxFsCombo, 28);
-  const fsSigCombo = Math.round(fsCombo * 0.44);
-
-  // Espaciado entre productos
-  const lineH = prodAreaH / Math.max(prods.length, 1);
-
-  posiciones.forEach(([ox, oy], comboIdx) => {
-    // Datos del combo correspondiente
-    const cd        = combosData[comboIdx];
-    const c         = COLORES[cd.color] || COLORES.azul;
-    const cabecera  = cd.cabecera;
-    const prods     = cd.prods.filter(p => p.nombre.trim());
-    let   sepTotal  = cd.prods.reduce((s,p) => s+(p.precio||0), 0);
-    const precioCombo = cd.precio || 0;
-    const ahorro    = sepTotal - precioCombo;
-    const vigencia  = cd.vigencia ? new Date(cd.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
-
-    // ── FONDO ─────────────────────────────────────────────────
-    doc.setFillColor(...hexToRgb(c.fondo));
-    doc.rect(ox, oy, CW, CH, 'F');
-
-    // ── CABECERA ──────────────────────────────────────────────
-    doc.setFillColor(...hexToRgb(c.header));
-    doc.rect(ox, oy, CW - precW, hH, 'F');
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(fsCab);
-    doc.setTextColor(255,224,0);
-    doc.text(cabecera, ox + (CW - precW)/2, oy + hH - 3, {align:'center'});
-
-    // ── PRODUCTOS ─────────────────────────────────────────────
-    doc.setFont('helvetica','bold');
-    prods.forEach((p, i) => {
-      const py = oy + prodAreaTop + lineH * i + lineH * 0.55;
-
-      // Bullet
-      doc.setFontSize(fsNom);
-      doc.setTextColor(255,224,0);
-      doc.text('•', ox + prodX, py);
-
-      // Nombre — truncar si no entra
-      doc.setTextColor(255,255,255);
-      let nom = p.nombre;
-      const maxW = prodW - 6 - (p.precio > 0 ? 18 : 0);
-      while (doc.getTextWidth(nom) > maxW && nom.length > 3) nom = nom.slice(0,-2)+'…';
-      doc.text(nom, ox + prodX + 5, py);
-
-      // Precio tachado — dibujado manualmente con línea
-      if (p.precio > 0) {
-        const precTxt = '$'+p.precio.toLocaleString('es-AR');
-        doc.setFontSize(fsPrec);
-        doc.setTextColor(255,255,255,120);
-        const precTxtX = ox + prodX + prodW - pad;
-        doc.text(precTxt, precTxtX, py, {align:'right'});
-
-        // Línea de tachado manual sobre el precio
-        const tw = doc.getTextWidth(precTxt);
-        const taY = py - fsPrec * 0.3528 * 0.35; // mitad de la altura del texto
-        doc.setDrawColor(255,100,100);
-        doc.setLineWidth(0.5);
-        doc.line(precTxtX - tw, taY, precTxtX, taY);
-        doc.setLineWidth(0.2);
-      }
-    });
-
-    // ── FRANJA AHORRO ─────────────────────────────────────────
-    const ahY = oy + CH - ahorroH - vigH;
-    doc.setFillColor(255,224,0);
-    doc.rect(ox, ahY, CW - precW, ahorroH, 'F');
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(fsAho);
-    doc.setTextColor(...hexToRgb(c.header));
-    doc.text('Ahorrás $ '+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + (CW-precW)/2, ahY + ahorroH - 3, {align:'center'});
-
-    // ── VIGENCIA ──────────────────────────────────────────────
-    doc.setFontSize(fsVig);
-    doc.setTextColor(255,255,255);
-    doc.text('Válido hasta '+vigencia, ox + (CW-precW)/2, oy + CH - 2, {align:'center'});
-
-    // ── PANEL PRECIO ──────────────────────────────────────────
-    const pX = ox + CW - precW;
-    doc.setFillColor(255,224,0);
-    doc.rect(pX, oy, precW, CH, 'F');
-
-    // Label
-    doc.setFontSize(fsPLabel);
-    doc.setTextColor(...hexToRgb(c.header));
-    doc.setFont('helvetica','bold');
-    doc.text('COMBO', pX + precW/2, oy + 8, {align:'center'});
-
-    // Precio anterior tachado
-    const antTxt = '$'+sepTotal.toLocaleString('es-AR');
-    doc.setFontSize(fsPAnt);
-    doc.setTextColor(120,120,120);
-    const antY = oy + 18;
-    doc.text(antTxt, pX + precW/2, antY, {align:'center'});
-    // Tachado manual
-    const antW = doc.getTextWidth(antTxt);
-    const antMidY = antY - fsPAnt * 0.3528 * 0.35;
-    doc.setDrawColor(180,60,60);
-    doc.setLineWidth(0.6);
-    doc.line(pX + precW/2 - antW/2, antMidY, pX + precW/2 + antW/2, antMidY);
-    doc.setLineWidth(0.2);
-
-    // Precio nuevo — centrado verticalmente en el panel
-    doc.setFontSize(fsSigCombo);
-    doc.setTextColor(...hexToRgb(c.header));
-    doc.setFont('helvetica','bold');
-    const wSig = doc.getTextWidth('$');
-    const wEsp = 1;
-    doc.setFontSize(fsCombo);
-    const wNum = doc.getTextWidth(precStr);
-    const totalPW = wSig + wEsp + wNum;
-    const startPX = pX + (precW - totalPW) / 2;
-    const centerY  = oy + 18 + (CH - 18 - ahorroH) / 2 + fsCombo * 0.3528 / 2;
-
-    doc.setFontSize(fsSigCombo);
-    doc.text('$', startPX, centerY);
-    doc.setFontSize(fsCombo);
-    doc.text(precStr, startPX + wSig + wEsp, centerY);
-
-    // Ahorro en panel precio
-    doc.setFillColor(...hexToRgb(c.header));
-    doc.rect(pX, oy + CH - ahorroH, precW, ahorroH, 'F');
-    doc.setFontSize(7);
-    doc.setTextColor(255,224,0);
-    const ahoStr = 'Ahorrás $'+(ahorro>0?ahorro.toLocaleString('es-AR'):'—');
-    let ahoTxt = ahoStr;
-    while(doc.getTextWidth(ahoTxt) > precW - 4 && ahoTxt.length > 3) ahoTxt = ahoTxt.slice(0,-2)+'…';
-    doc.text(ahoTxt, pX + precW/2, oy + CH - 3, {align:'center'});
-
-    // ── LÍNEAS DE CORTE ───────────────────────────────────────
-    doc.setDrawColor(160,160,160);
-    doc.setLineWidth(0.25);
-    doc.setLineDashPattern([2,2], 0);
-    if (ox === 0)  doc.line(0, oy + CH, 297, oy + CH);
-    if (oy === 0)  doc.line(ox + CW, 0, ox + CW, 210);
-    doc.setLineDashPattern([], 0);
+  // Descargar todas las imágenes
+  imgs.forEach((canvas, i) => {
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href    = url;
+      a.download = `oferta_hoja${i+1}_${new Date().toISOString().slice(0,10)}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
   });
-
-  doc.save('combo_' + new Date().toISOString().slice(0,10) + '.pdf');
-  toast('PDF de combo descargado');
+  toast(`✓ ${hojas} imagen${hojas>1?'es':'s'} descargada${hojas>1?'s':''}`);
 }
 
-
-// ── Combo — estado ───────────────────────────────────────────
-let combosGuardados    = [];  // combos del Sheet
-let comboActualId      = null; // ID del combo en edición (null = nuevo)
+// ── Combo — estado ────────────────────────────────────────────
+let combosGuardados    = [];
+let comboActualId      = null;
 let comboModificado    = false;
-let comboProductos     = [];  // [{nombre, precio}] del combo en edición
+let comboProductos     = [];
 let busquedaComboTimer = null;
+let listaCombos        = [];  // lista para imprimir
+let coPaginaPreview    = 0;
 
-function marcarModificado() {
-  comboModificado = true;
-  const btn = document.getElementById('btn-guardar-combo');
-  if (btn) btn.style.background = 'var(--danger)';
-}
+function marcarModificado() { comboModificado = true; }
 
 // ── Combo — lista guardados ───────────────────────────────────
 function cargarCombosGuardados() {
   const cont = document.getElementById('combo-lista-guardados');
   if (!cont) return;
-  cont.innerHTML = '<div class="res-empty"><div class="spinner" style="border-color:rgba(0,0,0,0.15);border-top-color:var(--text);margin:0 auto"></div></div>';
+  cont.innerHTML = '<div class="res-empty" style="padding:8px;font-size:11px;">Cargando...</div>';
   fetch(`${SCRIPT_URL}?accion=getCombos`)
     .then(r => r.json())
     .then(data => {
       combosGuardados = data.combos || [];
-      renderListaCombos();
+      renderCombosGuardados();
     })
-    .catch(() => {
-      cont.innerHTML = '<div class="res-empty">Error de conexión</div>';
-    });
+    .catch(() => { cont.innerHTML = '<div class="res-empty" style="padding:8px;">Error</div>'; });
 }
 
-function renderListaCombos() {
+function renderCombosGuardados() {
   const cont = document.getElementById('combo-lista-guardados');
   if (!cont) return;
   if (!combosGuardados.length) {
-    cont.innerHTML = '<div class="res-empty">No hay combos guardados<br><small>Creá uno con el botón "Nuevo"</small></div>';
+    cont.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:6px;">No hay combos guardados</div>';
     return;
   }
-  cont.innerHTML = combosGuardados.map(c => {
-    const isActive = c.id === comboActualId;
-    const nProds   = c.productos.filter(p => p.nombre).length;
-    return `<div class="res-item ${isActive?'style="background:var(--bg)"':''}" onclick="cargarComboGuardado('${c.id}')" style="${isActive?'background:var(--bg);border-left:3px solid var(--text);':''}">
-      <div class="ri-info">
-        <div class="ri-nombre">${c.nombre || 'Sin nombre'}</div>
-        <div class="ri-sec">${nProds} producto${nProds!==1?'s':''} · $${(c.precioCombo||0).toLocaleString('es-AR')}</div>
+  cont.innerHTML = combosGuardados.map(c => `
+    <div style="display:flex;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);gap:6px;cursor:pointer;" onclick="cargarComboEnFormulario('${c.id}')">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nombre||'Sin nombre'}</div>
+        <div style="font-size:10px;color:var(--muted);">$${(c.precioCombo||0).toLocaleString('es-AR')} · ${c.productos.length} prod.</div>
       </div>
-      <button onclick="event.stopPropagation();eliminarComboGuardado('${c.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 4px;" title="Eliminar">✕</button>
-    </div>`;
-  }).join('');
+      <button onclick="event.stopPropagation();agregarComboGuardadoALista('${c.id}')" style="font-size:10px;padding:2px 6px;border:0.5px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;white-space:nowrap;">+ Lista</button>
+    </div>`).join('');
 }
 
-function nuevoCombo() {
-  if (comboModificado && !confirm('Hay cambios sin guardar. ¿Continuar sin guardar?')) return;
-  comboActualId  = null;
-  comboProductos = [];
-  comboModificado = false;
-  document.getElementById('co-nombre-combo').value = '';
-  document.getElementById('co-precio').value = '';
-  document.getElementById('co-vigencia').value = '';
-  document.getElementById('co-cabecera').value = 'COMBO';
-  colorCombo = 'azul';
-  document.querySelectorAll('#co-color-opts .color-opt').forEach((el,i) => el.classList.toggle('selected', i===0));
-  document.getElementById('combo-form-titulo').textContent = 'Nuevo combo';
-  const btn = document.getElementById('btn-guardar-combo');
-  if (btn) btn.style.background = '';
-  renderProductosCombo();
-  actualizarCombo();
-  renderListaCombos();
-}
-
-function cargarComboGuardado(id) {
-  if (comboModificado && !confirm('Hay cambios sin guardar. ¿Continuar?')) return;
+function cargarComboEnFormulario(id) {
   const c = combosGuardados.find(x => x.id === id);
   if (!c) return;
-  comboActualId   = id;
-  comboProductos  = c.productos.map(p => ({nombre: p.nombre, precio: p.precio}));
-  comboModificado = false;
-
-  document.getElementById('co-nombre-combo').value = c.nombre || '';
-  document.getElementById('co-precio').value       = c.precioCombo || '';
-  document.getElementById('co-vigencia').value      = c.vigenciaHasta || '';
-  document.getElementById('co-cabecera').value      = c.cabecera || 'COMBO';
-  document.getElementById('combo-form-titulo').textContent = 'Editando: ' + (c.nombre || 'combo');
-
-  colorCombo = c.color || 'azul';
-  const colorMap = {'azul':'#1a56a0','rojo':'#CC0000','verde':'#1a7a3c'};
+  comboActualId  = id;
+  comboProductos = c.productos.map(p => ({nombre:p.nombre, precio:p.precio}));
+  document.getElementById('co-nombre-combo').value = c.nombre||'';
+  document.getElementById('co-precio').value        = c.precioCombo||'';
+  document.getElementById('co-vigencia').value       = c.vigenciaHasta||'';
+  document.getElementById('co-cabecera').value       = c.cabecera||'COMBO';
+  colorCombo = c.color||'azul';
   document.querySelectorAll('#co-color-opts .color-opt').forEach(el => {
-    el.classList.toggle('selected', el.getAttribute('title')?.toLowerCase() === colorCombo);
+    el.classList.toggle('selected', el.getAttribute('title')?.toLowerCase()===colorCombo);
   });
-
-  const btn = document.getElementById('btn-guardar-combo');
-  if (btn) btn.style.background = '';
-
   renderProductosCombo();
+  actualizarResumenCombo();
   actualizarCombo();
-  renderListaCombos();
 }
 
-// ── Combo — buscador de productos ─────────────────────────────
+function agregarComboGuardadoALista(id) {
+  const c = combosGuardados.find(x => x.id === id);
+  if (!c) return;
+  listaCombos.push({
+    nombre:    c.nombre,
+    cabecera:  c.cabecera,
+    color:     c.color,
+    prods:     c.productos,
+    precio:    c.precioCombo,
+    vigencia:  c.vigenciaHasta,
+  });
+  toast('Combo agregado a la lista');
+  renderListaCombos();
+  renderPreviewCombo();
+}
+
+// ── Combo — buscador ──────────────────────────────────────────
 function buscarProductoCombo(valor) {
   clearTimeout(busquedaComboTimer);
   const cont = document.getElementById('co-resultados');
-  if (!valor || valor.length < 2) { cont.style.display = 'none'; return; }
+  if (!valor || valor.length < 2) { cont.style.display='none'; return; }
   busquedaComboTimer = setTimeout(() => {
     fetch(`${SCRIPT_URL}?accion=buscarPorNombre&nombre=${encodeURIComponent(valor)}`)
       .then(r => r.json())
       .then(data => {
-        if (!data.resultados?.length) { cont.style.display = 'none'; return; }
+        if (!data.resultados?.length) { cont.style.display='none'; return; }
         cont.style.display = 'block';
         cont.innerHTML = data.resultados.slice(0,6).map(p => `
           <div class="res-item" onclick="agregarProductoCombo(${JSON.stringify(p).replace(/"/g,'&quot;')})">
-            <div class="ri-info">
-              <div class="ri-nombre">${p.nombre}</div>
-              <div class="ri-sec">${p.seccion}</div>
-            </div>
-            <div class="ri-precio">$ ${(p.precioConIVA||0).toLocaleString('es-AR')}</div>
+            <div class="ri-info"><div class="res-nombre">${p.nombre}</div></div>
+            <div class="res-precio">$ ${(p.precioConIVA||0).toLocaleString('es-AR')}</div>
             <div class="res-add">+</div>
           </div>`).join('');
       });
@@ -1793,14 +1645,11 @@ function buscarProductoCombo(valor) {
 }
 
 function agregarProductoCombo(p) {
-  if (comboProductos.length >= 4) {
-    document.getElementById('co-max-aviso').style.display = 'block';
-    return;
-  }
-  comboProductos.push({ nombre: p.nombre, precio: p.precioConIVA || 0 });
+  if (comboProductos.length >= 4) { document.getElementById('co-max-aviso').style.display='block'; return; }
+  comboProductos.push({nombre:p.nombre, precio:p.precioConIVA||0});
   document.getElementById('co-busqueda').value = '';
   document.getElementById('co-resultados').style.display = 'none';
-  document.getElementById('co-max-aviso').style.display = comboProductos.length >= 4 ? 'block' : 'none';
+  document.getElementById('co-max-aviso').style.display = comboProductos.length>=4?'block':'none';
   marcarModificado();
   renderProductosCombo();
   actualizarResumenCombo();
@@ -1808,16 +1657,16 @@ function agregarProductoCombo(p) {
 }
 
 function quitarProductoCombo(idx) {
-  comboProductos.splice(idx, 1);
-  document.getElementById('co-max-aviso').style.display = 'none';
+  comboProductos.splice(idx,1);
+  document.getElementById('co-max-aviso').style.display='none';
   marcarModificado();
   renderProductosCombo();
   actualizarResumenCombo();
   actualizarCombo();
 }
 
-function editarPrecioCombo(idx, val) {
-  comboProductos[idx].precio = parseFloat(val) || 0;
+function editarPrecioCombo(idx,val) {
+  comboProductos[idx].precio = parseFloat(val)||0;
   marcarModificado();
   actualizarResumenCombo();
   actualizarCombo();
@@ -1827,172 +1676,189 @@ function renderProductosCombo() {
   const cont = document.getElementById('co-productos-lista');
   if (!cont) return;
   if (!comboProductos.length) {
-    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">Buscá productos para agregar al combo</div>';
+    cont.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">Buscá productos para agregar</div>';
     return;
   }
-  cont.innerHTML = comboProductos.map((p, i) => `
+  cont.innerHTML = comboProductos.map((p,i) => `
     <div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);">
       <span style="font-size:11px;color:var(--muted);min-width:12px;">${i+1}</span>
       <span style="font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.nombre}</span>
-      <input type="number" value="${p.precio}" style="width:80px;font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);text-align:right;" oninput="editarPrecioCombo(${i},this.value)">
+      <input type="number" value="${p.precio}" style="width:75px;font-size:12px;padding:2px 5px;border:0.5px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);text-align:right;" oninput="editarPrecioCombo(${i},this.value)">
       <button onclick="quitarProductoCombo(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 2px;">✕</button>
     </div>`).join('');
 }
 
 function actualizarResumenCombo() {
-  const sep = comboProductos.reduce((s,p) => s+(p.precio||0), 0);
-  const precio = parseFloat(document.getElementById('co-precio')?.value) || 0;
+  const sep    = comboProductos.reduce((s,p)=>s+(p.precio||0),0);
+  const precio = parseFloat(document.getElementById('co-precio')?.value)||0;
   const ahorro = sep - precio;
-  const sepEl = document.getElementById('co-sep');
-  const ahoEl = document.getElementById('co-ahorro');
-  if (sepEl) sepEl.textContent = sep > 0 ? '$ '+sep.toLocaleString('es-AR') : '—';
-  if (ahoEl) ahoEl.textContent = ahorro > 0 ? '$ '+ahorro.toLocaleString('es-AR') : '—';
-}
-
-// ── Combo — guardar en Sheet ──────────────────────────────────
-function guardarComboDB() {
-  const nombre = document.getElementById('co-nombre-combo').value.trim();
-  const precio = parseFloat(document.getElementById('co-precio').value) || 0;
-  if (!nombre) { toast('Ingresá un nombre para el combo', true); return; }
-  if (!comboProductos.length) { toast('Agregá al menos un producto', true); return; }
-  if (!precio) { toast('Ingresá el precio del combo', true); return; }
-
-  const btn = document.getElementById('btn-guardar-combo');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Guardando...'; }
-
-  const vigencia = document.getElementById('co-vigencia').value;
-  const combo = {
-    nombre,
-    cabecera:     document.getElementById('co-cabecera').value,
-    color:        colorCombo,
-    productos:    comboProductos,
-    precioCombo:  precio,
-    vigenciaHasta: vigencia,
-  };
-
-  const accion  = comboActualId ? 'actualizarCombo' : 'guardarCombo';
-  const payload = comboActualId
-    ? JSON.stringify({ accion, id: comboActualId, combo })
-    : JSON.stringify({ accion, combo });
-
-  // Apps Script requiere fetch con redirect:'follow' para manejar CORS correctamente
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' }, // text/plain evita preflight CORS
-    body: payload,
-    redirect: 'follow',
-  })
-    .then(r => r.text())
-    .then(txt => {
-      const data = JSON.parse(txt);
-      if (data.ok) {
-        if (!comboActualId && data.id) comboActualId = data.id;
-        comboModificado = false;
-        toast('✓ Combo guardado');
-        cargarCombosGuardados();
-        document.getElementById('combo-form-titulo').textContent = 'Editando: ' + nombre;
-      } else {
-        toast('Error: ' + (data.error || 'desconocido'), true);
-      }
-    })
-    .catch(err => {
-      console.error('Error guardando combo:', err);
-      toast('Error de conexión al guardar', true);
-    })
-    .finally(() => {
-      if (btn) {
-        btn.disabled = false;
-        btn.style.background = '';
-        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Guardar combo';
-      }
-    });
-}
-
-function eliminarComboGuardado(id) {
-  if (!confirm('¿Eliminar este combo?')) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ accion: 'eliminarCombo', id }),
-    redirect: 'follow',
-  })
-    .then(r => r.text())
-    .then(txt => {
-      const data = JSON.parse(txt);
-      if (data.ok) {
-        toast('Combo eliminado');
-        if (comboActualId === id) nuevoCombo();
-        cargarCombosGuardados();
-      } else {
-        toast('Error al eliminar', true);
-      }
-    })
-    .catch(() => toast('Error de conexión', true));
-}
-
-// ── Combo — imprimir ─────────────────────────────────────────
-function imprimirComboActual() {
-  if (!comboProductos.length) { toast('El combo no tiene productos', true); return; }
-  const precio = parseFloat(document.getElementById('co-precio').value) || 0;
-  if (!precio) { toast('Ingresá el precio del combo', true); return; }
-  toast('Generando imagen...');
-  // Armar combosData con el combo actual para generarPNGCombo
-  const sep = comboProductos.reduce((s,p) => s+(p.precio||0), 0);
-  const vigencia = document.getElementById('co-vigencia').value;
-  combosData[0] = {
-    cabecera: document.getElementById('co-cabecera').value,
-    color:    colorCombo,
-    prods:    comboProductos.slice(0,4).concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4),
-    precio,
-    vigencia,
-  };
-  // Vaciar las otras 3 posiciones
-  for (let i = 1; i < 4; i++) combosData[i] = { cabecera:'COMBO', color:'azul', prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}], precio:0, vigencia:'' };
-  document.fonts.ready.then(() => generarPNGCombo());
-}
-
-// ── Combo — actualizar vista previa ──────────────────────────
-function actualizarCombo() {
-  actualizarResumenCombo();
-  // Construir combosData[0] con el estado actual para el preview
-  const precio  = parseFloat(document.getElementById('co-precio')?.value) || 0;
-  const vigencia = document.getElementById('co-vigencia')?.value || '';
-  const cabecera = document.getElementById('co-cabecera')?.value || 'COMBO';
-  const prods4   = comboProductos.slice(0,4).concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4);
-  combosData[0] = { cabecera, color: colorCombo, prods: prods4, precio, vigencia };
-  for (let i = 1; i < 4; i++) combosData[i] = { cabecera:'COMBO', color:'azul', prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}], precio:0, vigencia:'' };
-  const wrap = document.getElementById('combo-preview-wrap');
-  if (wrap) wrap.innerHTML = renderHojaComboPreview();
+  const sepEl  = document.getElementById('co-sep');
+  const ahoEl  = document.getElementById('co-ahorro');
+  if (sepEl) sepEl.textContent = sep>0?'$ '+sep.toLocaleString('es-AR'):'—';
+  if (ahoEl) ahoEl.textContent = ahorro>0?'$ '+ahorro.toLocaleString('es-AR'):'—';
 }
 
 function setColorCombo(color, el) {
   colorCombo = color;
-  document.querySelectorAll('#co-color-opts .color-opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('#co-color-opts .color-opt').forEach(o=>o.classList.remove('selected'));
   el.classList.add('selected');
   marcarModificado();
   actualizarCombo();
 }
 
-// ── Combo — escaneo con pistola ───────────────────────────────
-// El escaneo global redirige al buscador de combo cuando el módulo está activo
-// (ya manejado por el listener de keydown global)
+function actualizarCombo() {
+  actualizarResumenCombo();
+  const precio   = parseFloat(document.getElementById('co-precio')?.value)||0;
+  const vigencia = document.getElementById('co-vigencia')?.value||'';
+  const cabecera = document.getElementById('co-cabecera')?.value||'COMBO';
+  const prods4   = comboProductos.slice(0,4).concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4);
+  combosData[0]  = {cabecera, color:colorCombo, prods:prods4, precio, vigencia};
+  for (let i=1;i<4;i++) combosData[i]={cabecera:'COMBO',color:'azul',prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}],precio:0,vigencia:''};
+  const wrap = document.getElementById('combo-preview-wrap');
+  if (wrap) wrap.innerHTML = renderHojaComboPreview();
+}
 
+// ── Combo — lista para imprimir ───────────────────────────────
+function agregarComboALista() {
+  const nombre = document.getElementById('co-nombre-combo').value.trim();
+  const precio = parseFloat(document.getElementById('co-precio').value)||0;
+  if (!comboProductos.length) { toast('Agregá al menos un producto', true); return; }
+  if (!precio) { toast('Ingresá el precio del combo', true); return; }
 
+  listaCombos.push({
+    nombre:   nombre || 'Combo',
+    cabecera: document.getElementById('co-cabecera').value,
+    color:    colorCombo,
+    prods:    [...comboProductos],
+    precio,
+    vigencia: document.getElementById('co-vigencia').value,
+  });
 
-function generarPNGCombo() {
+  // Opcional: guardar en Sheet
+  guardarComboDB();
+
+  toast('Combo agregado a la lista');
+  renderListaCombos();
+  renderPreviewCombo();
+}
+
+function quitarComboLista(idx) {
+  listaCombos.splice(idx,1);
+  renderListaCombos();
+  renderPreviewCombo();
+}
+
+function vaciarListaCombos() {
+  if (!listaCombos.length) return;
+  if (!confirm('¿Vaciar la lista de combos?')) return;
+  listaCombos = [];
+  renderListaCombos();
+  renderPreviewCombo();
+}
+
+function renderListaCombos() {
+  const cont  = document.getElementById('co-lista-items');
+  const btn   = document.getElementById('btn-imprimir-combos');
+  const badge = document.getElementById('co-badge');
+  if (!cont) return;
+
+  const hojas = Math.ceil(listaCombos.length / 4)||0;
+  if (badge) badge.textContent = `${listaCombos.length} combo${listaCombos.length!==1?'s':''} · ${hojas} hoja${hojas!==1?'s':''}`;
+  if (btn)   btn.disabled = listaCombos.length===0;
+
+  const txtBtn = document.getElementById('btn-co-txt');
+  if (txtBtn) txtBtn.textContent = `Generar imagen${hojas>1?' ('+hojas+' hojas)':''}`;
+
+  if (!listaCombos.length) {
+    cont.innerHTML = `<div class="lista-empty">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted);margin:0 auto 8px;display:block"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      La lista está vacía<p>Agregá combos con el formulario</p></div>`;
+    return;
+  }
+  cont.innerHTML = listaCombos.map((c,i) => {
+    const col  = COLORES[c.color]||COLORES.azul;
+    const sep  = c.prods.reduce((s,p)=>s+(p.precio||0),0);
+    const aho  = sep - c.precio;
+    const hoja = Math.floor(i/4)+1;
+    const pos  = (i%4)+1;
+    return `<div style="display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);gap:10px;">
+      <div style="width:10px;height:32px;background:${col.fondo};border-radius:3px;flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);">${c.prods.filter(p=>p.nombre).length} prod. · $${c.precio.toLocaleString('es-AR')} · Ahorrás $${aho.toLocaleString('es-AR')}</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">Hoja ${hoja} pos.${pos}</div>
+      <div class="li-del" onclick="quitarComboLista(${i})">✕</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPreviewCombo() {
+  const wrap = document.getElementById('combo-preview-wrap');
+  const pag  = document.getElementById('co-paginador');
+  if (!wrap) return;
+
+  const hojas = Math.max(1, Math.ceil(listaCombos.length/4));
+  if (pag) {
+    pag.innerHTML = hojas>1 ? `
+      <button onclick="coPaginaPreview=Math.max(0,coPaginaPreview-1);renderPreviewCombo()" style="background:none;border:0.5px solid var(--border);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:11px;">←</button>
+      <span style="font-size:11px;color:var(--muted);">${coPaginaPreview+1}/${hojas}</span>
+      <button onclick="coPaginaPreview=Math.min(${hojas-1},coPaginaPreview+1);renderPreviewCombo()" style="background:none;border:0.5px solid var(--border);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:11px;">→</button>` : '';
+  }
+  coPaginaPreview = Math.min(coPaginaPreview, hojas-1);
+
+  // Armar combosData para la hoja actual
+  for (let i=0;i<4;i++) {
+    const c = listaCombos[coPaginaPreview*4+i];
+    if (c) {
+      combosData[i] = {cabecera:c.cabecera, color:c.color,
+        prods:c.prods.concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4),
+        precio:c.precio, vigencia:c.vigencia};
+    } else {
+      combosData[i] = {cabecera:'COMBO',color:'azul',prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}],precio:0,vigencia:''};
+    }
+  }
+  wrap.innerHTML = renderHojaComboPreview();
+}
+
+function imprimirListaCombos() {
+  if (!listaCombos.length) return;
+  toast('Generando imagen...');
+  document.fonts.ready.then(() => {
+    const hojas = Math.ceil(listaCombos.length/4);
+    for (let h=0;h<hojas;h++) {
+      for (let i=0;i<4;i++) {
+        const c = listaCombos[h*4+i];
+        if (c) {
+          combosData[i]={cabecera:c.cabecera,color:c.color,
+            prods:c.prods.concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4),
+            precio:c.precio,vigencia:c.vigencia};
+        } else {
+          combosData[i]={cabecera:'COMBO',color:'azul',prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}],precio:0,vigencia:''};
+        }
+      }
+      setTimeout(() => generarPNGComboHoja(h, hojas), h*500);
+    }
+  });
+}
+
+function generarPNGComboHoja(h, totalHojas) {
   const DPI   = 300;
   const MM2PX = DPI / 25.4;
   const CW = Math.round(148.5 * MM2PX);
   const CH = Math.round(105   * MM2PX);
 
+  // combosData ya fue cargado por imprimirListaCombos antes de llamar esta función
   const canvas = document.createElement('canvas');
   canvas.width  = CW * 2;
   canvas.height = CH * 2;
   const ctx = canvas.getContext('2d');
-
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  // Reusar la lógica de generarPNGCombo — llamarla directamente
+  // ya que combosData tiene los datos correctos para esta hoja
+  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
   const cabH   = Math.round(CH * 44/210);
   const fsCab  = Math.round(CH * 25/210);
   const fsNom  = Math.round(CH * 14/210);
@@ -2002,351 +1868,142 @@ function generarPNGCombo() {
   const precH  = Math.round(CH * 63/210);
   const pad    = Math.round(CW * 0.025);
 
-  const posiciones = [[0,0],[CW,0],[0,CH],[CW,CH]];
-
   posiciones.forEach(([ox, oy], idx) => {
     const d = combosData[idx];
-    const prods = (d.prods || []).filter(p => p.nombre && p.nombre.trim());
-    const tieneContenido = prods.length > 0 && d.precio > 0;
-
-    if (!tieneContenido) {
-      ctx.save();
-      ctx.setLineDash([16,16]);
-      ctx.strokeStyle = '#DDDDDD';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(ox+4, oy+4, CW-4, CH-4);
-      ctx.restore();
-      return;
+    const prods = (d.prods||[]).filter(p => p.nombre&&p.nombre.trim());
+    if (!prods.length || !d.precio) {
+      ctx.save(); ctx.setLineDash([16,16]); ctx.strokeStyle='#DDD'; ctx.lineWidth=3;
+      ctx.strokeRect(ox+4,oy+4,CW-8,CH-8); ctx.restore(); return;
     }
-
-    const c        = COLORES[d.color] || COLORES.azul;
-    const sepTotal = (d.prods || []).reduce((s,p) => s+(parseFloat(p.precio)||0), 0);
-    const ahorro   = sepTotal - (parseFloat(d.precio)||0);
+    const c = COLORES[d.color]||COLORES.azul;
+    const sepTotal = (d.prods||[]).reduce((s,p)=>s+(parseFloat(p.precio)||0),0);
+    const ahorro   = sepTotal-(parseFloat(d.precio)||0);
     const precStr  = (parseFloat(d.precio)||0).toLocaleString('es-AR');
-    const vigencia = d.vigencia
-      ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})
-      : '—';
+    const vigencia = d.vigencia ? new Date(d.vigencia+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
 
-    // Fondo
-    ctx.fillStyle = c.fondo;
-    ctx.fillRect(ox, oy, CW, CH);
+    ctx.fillStyle=c.fondo; ctx.fillRect(ox,oy,CW,CH);
+    ctx.fillStyle=c.header; ctx.fillRect(ox,oy,CW,cabH);
+    ctx.fillStyle='#FFE000'; ctx.font=`900 ${fsCab}px 'Bebas Neue',sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(d.cabecera||'COMBO', ox+CW/2, oy+cabH/2);
 
-    // Cabecera
-    ctx.fillStyle = c.header;
-    ctx.fillRect(ox, oy, CW, cabH);
-    ctx.fillStyle = '#FFE000';
-    ctx.font = `900 ${fsCab}px 'Bebas Neue', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(d.cabecera || 'COMBO', ox + CW/2, oy + cabH/2);
-
-    // Zona productos
-    const vigH    = Math.round(CH * 0.075);
-    const prodTop = oy + cabH;
-    const prodBot = oy + CH - precH - vigH;
-    const prodH   = prodBot - prodTop;
-    const nProds  = prods.length;
-    const lineH   = Math.floor(prodH / Math.max(nProds, 1));
-
-    prods.forEach((p, i) => {
-      const midY = prodTop + i * lineH + lineH/2;
-
-      // Bullet
-      ctx.fillStyle = '#FFE000';
-      ctx.font = `900 ${Math.round(fsNom*1.1)}px Arial`;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('•', ox + pad, midY);
-
-      // Nombre
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
-      const precTxt = p.precio > 0 ? '$ '+parseFloat(p.precio).toLocaleString('es-AR') : '';
-      let precW2 = 0;
-      if (precTxt) {
-        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
-        precW2 = ctx.measureText(precTxt).width + pad;
-        ctx.font = `700 ${fsNom}px 'Oswald', sans-serif`;
-      }
-      const maxNomW = CW - pad*3 - Math.round(fsNom*0.8) - precW2;
-      let nom = p.nombre;
-      while (ctx.measureText(nom).width > maxNomW && nom.length > 3) nom = nom.slice(0,-2)+'…';
-      ctx.textAlign = 'left';
-      ctx.fillText(nom, ox + pad + Math.round(fsNom*0.8), midY);
-
-      // Precio tachado
-      if (p.precio > 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
-        ctx.font = `400 ${fsPrec}px 'Oswald', sans-serif`;
-        ctx.textAlign = 'right';
-        const precRX = ox + CW - pad;
-        ctx.fillText(precTxt, precRX, midY);
-        const tw = ctx.measureText(precTxt).width;
-        ctx.strokeStyle = 'rgba(255,80,80,0.9)';
-        ctx.lineWidth = Math.max(2, Math.round(fsPrec*0.08));
-        ctx.beginPath();
-        ctx.moveTo(precRX - tw, midY - fsPrec*0.05);
-        ctx.lineTo(precRX,      midY - fsPrec*0.05);
-        ctx.stroke();
+    const vigH=Math.round(CH*0.075), prodTop=oy+cabH, prodBot=oy+CH-precH-vigH;
+    const lineH=Math.floor((prodBot-prodTop)/Math.max(prods.length,1));
+    prods.forEach((p,i)=>{
+      const midY=prodTop+i*lineH+lineH/2;
+      ctx.fillStyle='#FFE000'; ctx.font=`900 ${Math.round(fsNom*1.1)}px Arial`;
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText('•',ox+pad,midY);
+      ctx.fillStyle='#FFF'; ctx.font=`700 ${fsNom}px 'Oswald',sans-serif`;
+      const pt=p.precio>0?'$ '+parseFloat(p.precio).toLocaleString('es-AR'):'';
+      let pw=0; if(pt){ctx.font=`400 ${fsPrec}px 'Oswald',sans-serif`;pw=ctx.measureText(pt).width+pad;ctx.font=`700 ${fsNom}px 'Oswald',sans-serif`;}
+      const mW=CW-pad*3-Math.round(fsNom*0.8)-pw;
+      let nom=p.nombre; while(ctx.measureText(nom).width>mW&&nom.length>3) nom=nom.slice(0,-2)+'…';
+      ctx.fillText(nom,ox+pad+Math.round(fsNom*0.8),midY);
+      if(p.precio>0){
+        ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.font=`400 ${fsPrec}px 'Oswald',sans-serif`;
+        ctx.textAlign='right'; const pX=ox+CW-pad;
+        ctx.fillText(pt,pX,midY);
+        const tw=ctx.measureText(pt).width;
+        ctx.strokeStyle='rgba(255,80,80,0.9)'; ctx.lineWidth=Math.max(2,Math.round(fsPrec*0.08));
+        ctx.beginPath(); ctx.moveTo(pX-tw,midY-fsPrec*0.05); ctx.lineTo(pX,midY-fsPrec*0.05); ctx.stroke();
       }
     });
 
-    // Vigencia
-    const vigY = oy + CH - precH - vigH;
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = `400 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Válido hasta ' + vigencia, ox + CW/2, vigY + vigH/2);
+    const vigY=oy+CH-precH-vigH;
+    ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font=`400 ${Math.round(CH*0.055)}px 'Oswald',sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('Válido hasta '+vigencia,ox+CW/2,vigY+vigH/2);
 
-    // Zona precio inferior
-    const precZonaY = oy + CH - precH;
-    const mitad = Math.round(CW * 0.45);
+    const precZY=oy+CH-precH, mitad=Math.round(CW*0.45);
+    ctx.fillStyle='#FFE000'; ctx.fillRect(ox,precZY,mitad,precH);
+    ctx.fillStyle=c.header; ctx.font=`700 ${Math.round(CH*0.055)}px 'Oswald',sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('AHORRÁS',ox+mitad/2,precZY+precH*0.32);
+    ctx.font=`700 ${Math.round(CH*0.085)}px 'Oswald',sans-serif`;
+    ctx.fillText('$ '+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'),ox+mitad/2,precZY+precH*0.72);
 
-    // AHORRÁS (izquierda, amarillo)
-    ctx.fillStyle = '#FFE000';
-    ctx.fillRect(ox, precZonaY, mitad, precH);
-    ctx.fillStyle = c.header;
-    ctx.font = `700 ${Math.round(CH*0.055)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('AHORRÁS', ox + mitad/2, precZonaY + precH*0.32);
-    ctx.font = `700 ${Math.round(CH*0.085)}px 'Oswald', sans-serif`;
-    ctx.fillText('$ '+(ahorro>0?ahorro.toLocaleString('es-AR'):'—'), ox + mitad/2, precZonaY + precH*0.72);
+    const pcX=ox+mitad+(CW-mitad)/2;
+    ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.font=`400 ${Math.round(CH*0.06)}px 'Oswald',sans-serif`;
+    ctx.textBaseline='middle';
+    const aT='$ '+sepTotal.toLocaleString('es-AR');
+    ctx.fillText(aT,pcX,precZY+precH*0.22);
+    const aW=ctx.measureText(aT).width;
+    ctx.strokeStyle='rgba(255,80,80,0.8)'; ctx.lineWidth=Math.max(3,Math.round(CH*0.008));
+    ctx.beginPath(); ctx.moveTo(pcX-aW/2,precZY+precH*0.22); ctx.lineTo(pcX+aW/2,precZY+precH*0.22); ctx.stroke();
 
-    // Precio anterior tachado (derecha)
-    const precColX = ox + mitad + (CW - mitad)/2;
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = `400 ${Math.round(CH*0.06)}px 'Oswald', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const antTxt = '$ '+sepTotal.toLocaleString('es-AR');
-    ctx.fillText(antTxt, precColX, precZonaY + precH*0.22);
-    const antW = ctx.measureText(antTxt).width;
-    ctx.strokeStyle = 'rgba(255,80,80,0.8)';
-    ctx.lineWidth = Math.max(3, Math.round(CH*0.008));
-    ctx.beginPath();
-    ctx.moveTo(precColX - antW/2, precZonaY + precH*0.22);
-    ctx.lineTo(precColX + antW/2, precZonaY + precH*0.22);
-    ctx.stroke();
-
-    // Precio combo
-    let fsN = fsNum, fsS = fsSig;
-    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
-    let wNum = ctx.measureText(precStr).width;
-    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
-    let wSig = ctx.measureText('$').width;
-    const wEsp = Math.round(CW*0.01);
-    const maxPW = (CW - mitad) - pad*2;
-    while ((wSig+wEsp+wNum) > maxPW && fsN > 20) {
-      fsN -= 4; fsS = Math.round(fsN*0.38);
-      ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`; wNum = ctx.measureText(precStr).width;
-      ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`; wSig = ctx.measureText('$').width;
-    }
-    const totalW  = wSig + wEsp + wNum;
-    const startX  = precColX - totalW/2;
-    const priceMidY = precZonaY + precH*0.65;
-    ctx.fillStyle = '#FFE000';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.font = `900 ${fsS}px 'Bebas Neue', sans-serif`;
-    ctx.fillText('$', startX, priceMidY);
-    ctx.font = `900 ${fsN}px 'Bebas Neue', sans-serif`;
-    ctx.fillText(precStr, startX + wSig + wEsp, priceMidY);
+    let fsN=fsNum,fsS=fsSig;
+    ctx.font=`900 ${fsN}px 'Bebas Neue',sans-serif`; let wN=ctx.measureText(precStr).width;
+    ctx.font=`900 ${fsS}px 'Bebas Neue',sans-serif`; let wS=ctx.measureText('$').width;
+    const wE=Math.round(CW*0.01),mPW=(CW-mitad)-pad*2;
+    while((wS+wE+wN)>mPW&&fsN>20){fsN-=4;fsS=Math.round(fsN*0.38);ctx.font=`900 ${fsN}px 'Bebas Neue',sans-serif`;wN=ctx.measureText(precStr).width;ctx.font=`900 ${fsS}px 'Bebas Neue',sans-serif`;wS=ctx.measureText('$').width;}
+    const tW=wS+wE+wN,sX=pcX-tW/2,pY=precZY+precH*0.65;
+    ctx.fillStyle='#FFE000'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.font=`900 ${fsS}px 'Bebas Neue',sans-serif`; ctx.fillText('$',sX,pY);
+    ctx.font=`900 ${fsN}px 'Bebas Neue',sans-serif`; ctx.fillText(precStr,sX+wS+wE,pY);
   });
 
-  // Líneas de corte
-  ctx.save();
-  ctx.setLineDash([24,24]);
-  ctx.strokeStyle = 'rgba(140,140,140,0.45)';
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(0, CH);  ctx.lineTo(CW*2, CH);
-  ctx.moveTo(CW, 0);  ctx.lineTo(CW, CH*2);
-  ctx.stroke();
-  ctx.restore();
+  ctx.save(); ctx.setLineDash([24,24]); ctx.strokeStyle='rgba(140,140,140,0.45)'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(0,CH); ctx.lineTo(CW*2,CH); ctx.moveTo(CW,0); ctx.lineTo(CW,CH*2); ctx.stroke(); ctx.restore();
 
-  canvas.toBlob(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'combos_' + new Date().toISOString().slice(0,10) + '.png';
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`combos_hoja${h+1}_${new Date().toISOString().slice(0,10)}.png`;
     a.click();
     URL.revokeObjectURL(url);
-    toast('✓ Imagen descargada — imprimí al 100%');
-  }, 'image/png');
+  },'image/png');
 }
 
+// ── Combo — guardar en Sheet ──────────────────────────────────
+function guardarComboDB() {
+  const nombre = document.getElementById('co-nombre-combo').value.trim();
+  const precio = parseFloat(document.getElementById('co-precio').value)||0;
+  if (!nombre || !comboProductos.length || !precio) return; // silencioso
 
-// ── Editar precio en lista — guarda en Sheet ─────────────────
-function editarPrecioLista(idx, valor) {
-  const nuevoPrecio = parseInt(valor) || 0;
-  if (!nuevoPrecio || nuevoPrecio === lista[idx].precio) return;
-  const item = lista[idx];
-  item.precio = nuevoPrecio;
-  actualizarStats();
-
-  // Guardar nuevo precio en el Sheet
-  const barcode = item.barcode;
-  if (!barcode) {
-    toast('Precio actualizado en la lista (sin código de barras para guardar en Sheet)');
-    return;
-  }
-
-  fetch(`${SCRIPT_URL}?accion=actualizarPrecio&barcode=${encodeURIComponent(barcode)}&precio=${nuevoPrecio}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) {
-        toast('✓ Precio actualizado: ' + item.nombre);
-      } else {
-        toast('Precio actualizado en lista (error al guardar: ' + (data.error||'') + ')', true);
-      }
-    })
-    .catch(() => toast('Precio actualizado en lista (sin conexión)', false));
-}
-
-// ── Drag & drop importación ───────────────────────────────────
-function dragOver(e) {
-  e.preventDefault();
-  const dz = document.getElementById('drop-zone');
-  dz.style.borderColor = 'var(--text)';
-  dz.style.background  = 'var(--surface)';
-  document.getElementById('drop-text').textContent = '¡Soltá el archivo!';
-}
-
-function dragLeave(e) {
-  const dz = document.getElementById('drop-zone');
-  dz.style.borderColor = 'var(--border)';
-  dz.style.background  = 'var(--bg)';
-  document.getElementById('drop-text').textContent = 'Soltá el archivo acá';
-}
-
-function dropFile(e) {
-  e.preventDefault();
-  dragLeave(e);
-  const file = e.dataTransfer.files[0];
-  if (file) archivoSeleccionado(file);
-}
-
-function archivoSeleccionado(file) {
-  if (!file) return;
-  if (!file.name.match(/\.xlsx?$/i)) {
-    toast('Solo se aceptan archivos Excel (.xlsx)', true);
-    return;
-  }
-
-  document.getElementById('drop-text').textContent = file.name;
-  document.getElementById('drop-zone').style.borderColor = 'var(--success)';
-
-  // Leer con SheetJS
-  if (typeof XLSX === 'undefined') {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    script.onload = () => procesarExcel(file);
-    document.head.appendChild(script);
-  } else {
-    procesarExcel(file);
-  }
-}
-
-function procesarExcel(file) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const workbook  = XLSX.read(e.target.result, { type: 'array' });
-      const sheet     = workbook.Sheets[workbook.SheetNames[0]];
-      const filas     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-
-      if (!filas.length) { toast('El archivo está vacío', true); return; }
-
-      // Detectar columnas
-      const primeraFila = filas[0];
-      const cols = Object.keys(primeraFila);
-      const colNombre   = cols.find(c => c.toLowerCase().includes('nombre'));
-      const colPrecio   = cols.find(c => c.toLowerCase().includes('precio') && c.toLowerCase().includes('venta'));
-      const colCategoria = cols.find(c => c.toLowerCase().includes('categor'));
-      const colBarcode  = cols.find(c => c.toLowerCase().includes('barras') || c.toLowerCase().includes('barcode'));
-
-      if (!colNombre || !colPrecio) {
-        toast('No se encontraron las columnas Nombre y Precio de venta', true);
-        return;
-      }
-
-      // Procesar filas
-      const productos = [];
-      filas.forEach(fila => {
-        const nombre = String(fila[colNombre] || '').trim();
-        if (!nombre || nombre === 'nan') return;
-        const precio = parseFloat(fila[colPrecio]) || 0;
-        let barcode  = colBarcode ? String(fila[colBarcode] || '').trim() : '';
-        if (barcode.endsWith('.0')) barcode = barcode.slice(0, -2);
-        const cat    = colCategoria ? String(fila[colCategoria] || '').trim() : '';
-        productos.push({ nombre, precioVenta: precio, codigoBarras: barcode, categoria: cat });
-      });
-
-      if (!productos.length) { toast('No se encontraron productos válidos', true); return; }
-
-      if (!confirm(`Se van a importar ${productos.length} productos y reemplazar la lista actual. ¿Continuar?`)) return;
-
-      importarProductosWeb(productos);
-    } catch(err) {
-      toast('Error al leer el archivo: ' + err.message, true);
-    }
+  const vigencia = document.getElementById('co-vigencia').value;
+  const combo = {
+    nombre, cabecera: document.getElementById('co-cabecera').value,
+    color: colorCombo, productos: comboProductos, precioCombo: precio, vigenciaHasta: vigencia,
   };
-  reader.readAsArrayBuffer(file);
+  const accion  = comboActualId ? 'actualizarCombo' : 'guardarCombo';
+  const payload = comboActualId
+    ? JSON.stringify({accion, id:comboActualId, combo})
+    : JSON.stringify({accion, combo});
+
+  fetch(SCRIPT_URL, {method:'POST',headers:{'Content-Type':'text/plain'},body:payload,redirect:'follow'})
+    .then(r=>r.text()).then(txt=>{
+      const data=JSON.parse(txt);
+      if (data.ok) {
+        if (!comboActualId && data.id) comboActualId=data.id;
+        comboModificado=false;
+        cargarCombosGuardados();
+      }
+    }).catch(()=>{});
 }
 
-function importarProductosWeb(productos) {
-  const progDiv = document.getElementById('import-progress');
-  const progTxt = document.getElementById('import-prog-txt');
-  const progPct = document.getElementById('import-prog-pct');
-  const progBar = document.getElementById('import-prog-bar');
-  progDiv.style.display = 'block';
+function eliminarComboGuardado(id) {
+  if (!confirm('¿Eliminar este combo?')) return;
+  fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({accion:'eliminarCombo',id}),redirect:'follow'})
+    .then(r=>r.text()).then(txt=>{
+      const data=JSON.parse(txt);
+      if (data.ok) { toast('Combo eliminado'); cargarCombosGuardados(); }
+    });
+}
 
-  const BATCH = 200;
-  const lotes  = [];
-  for (let i = 0; i < productos.length; i += BATCH)
-    lotes.push(productos.slice(i, i + BATCH));
-
-  let importados = 0;
-
-  async function enviarLote(i) {
-    if (i >= lotes.length) {
-      // Terminó
-      progTxt.textContent = `✓ ${importados} productos importados`;
-      progPct.textContent = '100%';
-      progBar.style.width = '100%';
-      progBar.style.background = 'var(--success)';
-      toast('✓ ' + importados + ' productos importados correctamente');
-      cargarInfo();
-      return;
-    }
-
-    const pct = Math.round(i / lotes.length * 100);
-    progTxt.textContent = `Enviando lote ${i+1} de ${lotes.length}...`;
-    progPct.textContent = pct + '%';
-    progBar.style.width = pct + '%';
-
-    try {
-      const resp = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ accion: 'importarProductos', productos: lotes[i], lote: i+1 }),
-        redirect: 'follow',
-      });
-      const data = JSON.parse(await resp.text());
-      if (data.ok) {
-        importados += data.importados || lotes[i].length;
-        enviarLote(i + 1);
-      } else {
-        toast('Error en lote ' + (i+1) + ': ' + (data.error||''), true);
-      }
-    } catch(err) {
-      toast('Error de conexión en lote ' + (i+1), true);
-    }
-  }
-
-  enviarLote(0);
+function imprimirComboActual() {
+  if (!comboProductos.length) { toast('El combo no tiene productos',true); return; }
+  const precio=parseFloat(document.getElementById('co-precio').value)||0;
+  if (!precio) { toast('Ingresá el precio del combo',true); return; }
+  toast('Generando imagen...');
+  const sep=comboProductos.reduce((s,p)=>s+(p.precio||0),0);
+  const vigencia=document.getElementById('co-vigencia').value;
+  combosData[0]={cabecera:document.getElementById('co-cabecera').value,color:colorCombo,
+    prods:comboProductos.slice(0,4).concat([{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}]).slice(0,4),
+    precio,vigencia};
+  for (let i=1;i<4;i++) combosData[i]={cabecera:'COMBO',color:'azul',prods:[{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0},{nombre:'',precio:0}],precio:0,vigencia:''};
+  document.fonts.ready.then(()=>generarPNGCombo());
 }
 
 // ── Info sistema ──────────────────────────────────────────────
